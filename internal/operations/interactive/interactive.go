@@ -2,6 +2,7 @@ package interactive
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/charmbracelet/huh"
@@ -17,11 +18,13 @@ import (
 var commandJSON []byte
 
 const iconWidth = 3
+const shortcutsEnabled = false
 
 type Command struct {
 	Id            string `json:"id"`
 	Icon          string `json:"icon"`
 	Name          string `json:"name"`
+	Shortcut      string `json:"shortcut"`
 	Description   string `json:"description"`
 	NextStep      string `json:"nextStep"`
 	NextStepTitle string `json:"nextStepTitle"`
@@ -41,8 +44,13 @@ func StartInteractive(rootCmd *cobra.Command) {
 	commandOptions := make([]huh.Option[Command], len(commands))
 
 	for i, c := range commands {
-		title := " " + getTitle(c)
-		commandOptions[i] = huh.NewOption(title, c)
+		if c.Shortcut == "none" || !shortcutsEnabled {
+			formattedTitle := " " + getTitle(c)
+			commandOptions[i] = huh.NewOption(formattedTitle, c)
+		} else {
+			formattedTitle := fmt.Sprintf("%-15s(%s)", " "+getTitle(c), c.Shortcut)
+			commandOptions[i] = huh.NewOption(formattedTitle, c)
+		}
 	}
 
 	theme := huh.ThemeCatppuccin()
@@ -52,20 +60,21 @@ func StartInteractive(rootCmd *cobra.Command) {
 		huh.NewGroup(
 			huh.NewSelect[Command]().
 				Title("Igitt").
+				Filtering(true).
 				Height(20).
 				DescriptionFunc(func() string {
 					if selectedCommand.NextStep != "none" {
 						return "\n" + getTitle(selectedCommand) + ": " + selectedCommand.Description + "\n\n" + "     " + "Next step: " + selectedCommand.NextStepTitle + "\n"
 					}
-					return "\n" + getTitle(selectedCommand) + ": " + selectedCommand.Description + "\n\n\n"
+					return "\n" + getTitle(selectedCommand) + ": " + selectedCommand.Description + "\n\n" + "     " + "No next steps" + "\n"
 				}, &selectedCommand).
 				Options(commandOptions...).
 				Value(&selectedCommand),
 		),
+
 		huh.NewGroup(huh.NewInput().
 			Title("Link to Git repository").
 			Description("\n  Enter the link to your repository here.\n").
-			Suggestions([]string{"https://github.com"}).
 			Value(&repoUrlInput),
 		).WithHideFunc(func() bool {
 			return selectedCommand.NextStep != "op-enter-repo-url"
