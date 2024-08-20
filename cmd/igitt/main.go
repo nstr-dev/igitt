@@ -1,16 +1,9 @@
 package main
 
 import (
-	"os"
-
-	"github.com/noahstreller/igitt/internal/utilities/logger"
+	"github.com/noahstreller/igitt/internal/utilities/initialize"
 )
 
 func main() {
-	arugments := os.Args
-
-	for i := 0; i < len(arugments); i++ {
-		print(arugments[i] + " ")
-	}
-	logger.InfoLogger.Println("Hello")
+	initialize.InitializeIgitt()
 }
