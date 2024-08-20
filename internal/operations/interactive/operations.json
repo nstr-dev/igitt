@@ -1,0 +1,18 @@
+[
+  {
+    "id": "op-clone",
+    "name": "Clone",
+    "description": "Clones a remote repository to your local device",
+    "icon": "",
+    "nextStep": "op-enter-repo-url",
+    "nextStepTitle": "Enter repository URL"
+  },
+  {
+    "id": "op-init",
+    "name": "Initialize",
+    "description": "Create an empty Git repository in the current folder",
+    "icon": "",
+    "nextStep": "none",
+    "nextStepTitle": "None"
+  }
+]
