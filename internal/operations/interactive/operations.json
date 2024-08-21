@@ -4,7 +4,9 @@
     "name": "Clone",
     "shortcut": "cln",
     "description": "Clones a remote repository to your local device",
-    "icon": "",
+    "icon": "⎘",
+    "icon_emoji": "📂",
+    "icon_nerdfont": "",
     "nextStep": "op-enter-repo-url",
     "nextStepTitle": "Enter remote repository URL"
   },
@@ -13,7 +15,9 @@
     "name": "Init",
     "shortcut": "none",
     "description": "Initialize an empty Git repository in the current folder",
-    "icon": "",
+    "icon": "✧",
+    "icon_emoji": "✨",
+    "icon_nerdfont": "",
     "nextStep": "none",
     "nextStepTitle": "None"
   },
@@ -22,7 +26,9 @@
     "name": "Pull",
     "shortcut": "pl",
     "description": "Fetch from and integrate with another repository or a local branch",
-    "icon": "",
+    "icon": "↓",
+    "icon_emoji": "🔽",
+    "icon_nerdfont": "↓",
     "nextStep": "none",
     "nextStepTitle": "None"
   },
@@ -31,7 +37,20 @@
     "name": "Push",
     "shortcut": "ps",
     "description": "Update remote repository with local changes",
-    "icon": "",
+    "icon": "↑",
+    "icon_emoji": "🔼",
+    "icon_nerdfont": "↑",
+    "nextStep": "none",
+    "nextStepTitle": "None"
+  },
+  {
+    "id": "exit",
+    "name": "Exit",
+    "shortcut": "none",
+    "description": "Quit Igitt",
+    "icon": "×",
+    "icon_emoji": "❌",
+    "icon_nerdfont": "×",
     "nextStep": "none",
     "nextStepTitle": "None"
   }

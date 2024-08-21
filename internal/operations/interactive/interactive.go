@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/noahstreller/igitt/internal/operations"
 	"github.com/noahstreller/igitt/internal/utilities/logger"
 	"github.com/rivo/uniseg"
 	"github.com/spf13/cobra"
@@ -17,12 +18,23 @@ import (
 //go:embed operations.json
 var commandJSON []byte
 
-const iconWidth = 3
-const shortcutsEnabled = false
+const (
+	Unicode IconType = iota
+	Emoji
+	NerdFont
+)
+
+type IconType int
+
+func (d IconType) String() string {
+	return [...]string{"Unicode", "Emoji", "NerdFont"}[d]
+}
 
 type Command struct {
 	Id            string `json:"id"`
 	Icon          string `json:"icon"`
+	IconEmoji     string `json:"icon_emoji"`
+	IconNerdFont  string `json:"icon_nerdfont"`
 	Name          string `json:"name"`
 	Shortcut      string `json:"shortcut"`
 	Description   string `json:"description"`
@@ -30,8 +42,48 @@ type Command struct {
 	NextStepTitle string `json:"nextStepTitle"`
 }
 
+const iconWidth = 3
+const shortcutsEnabled = false
+const iconVariant = NerdFont
+
 func getTitle(command Command) string {
+	if iconVariant == Emoji {
+		return command.IconEmoji + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconEmoji)) + command.Name
+	}
+	if iconVariant == NerdFont {
+		return command.IconNerdFont + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconNerdFont)) + command.Name
+	}
 	return command.Icon + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.Icon)) + command.Name
+}
+
+func getNextStepIcon(variant IconType) string {
+	if variant == Emoji {
+		return "⏩"
+	}
+	if variant == NerdFont {
+		return ""
+	}
+	return "↪"
+}
+
+func getNoNextStepIcon(variant IconType) string {
+	if variant == Emoji {
+		return "🎯"
+	}
+	if variant == NerdFont {
+		return ""
+	}
+	return "◎"
+}
+
+func getLinkIcon(variant IconType) string {
+	if variant == Emoji {
+		return "🔗  "
+	}
+	if variant == NerdFont {
+		return "  "
+	}
+	return ""
 }
 
 func StartInteractive(rootCmd *cobra.Command) {
@@ -64,9 +116,9 @@ func StartInteractive(rootCmd *cobra.Command) {
 				Height(20).
 				DescriptionFunc(func() string {
 					if selectedCommand.NextStep != "none" {
-						return "\n" + getTitle(selectedCommand) + ": " + selectedCommand.Description + "\n\n" + "     " + "Next step: " + selectedCommand.NextStepTitle + "\n"
+						return "\n" + getTitle(selectedCommand) + ": " + selectedCommand.Description + "\n\n" + "   " + getNextStepIcon(iconVariant) + "  " + "Next step: " + selectedCommand.NextStepTitle + "\n"
 					}
-					return "\n" + getTitle(selectedCommand) + ": " + selectedCommand.Description + "\n\n" + "     " + "No next steps" + "\n"
+					return "\n" + getTitle(selectedCommand) + ": " + selectedCommand.Description + "\n\n" + "   " + getNoNextStepIcon(iconVariant) + "  " + "No next steps" + "\n"
 				}, &selectedCommand).
 				Options(commandOptions...).
 				Value(&selectedCommand),
@@ -74,7 +126,21 @@ func StartInteractive(rootCmd *cobra.Command) {
 
 		huh.NewGroup(huh.NewInput().
 			Title("Link to Git repository").
-			Description("\n  Enter the link to your repository here.\n").
+			Description("\n"+getLinkIcon(iconVariant)+"Enter the link to your repository here.\n").
+			Suggestions([]string{
+				"https://github.com/",
+				"https://gitlab.com/",
+				"https://bitbucket.org/",
+				"https://sourcehut.org/",
+				"https://codeberg.org/",
+				"https://gitea.io/",
+			}).
+			Validate(func(s string) error {
+				if s == "" {
+					return fmt.Errorf("if you're ready to clone, enter a repository URL")
+				}
+				return nil
+			}).
 			Value(&repoUrlInput),
 		).WithHideFunc(func() bool {
 			return selectedCommand.NextStep != "op-enter-repo-url"
@@ -85,5 +151,9 @@ func StartInteractive(rootCmd *cobra.Command) {
 		logger.ErrorLogger.Fatal(err)
 	}
 
-	// rootCmd.Print(selectedCommand)
+	if selectedCommand.Id == "op-clone" && repoUrlInput != "" {
+		logger.InfoLogger.Println("clone command selected, sending to operations")
+		operations.CloneRepository(repoUrlInput)
+	}
+
 }
