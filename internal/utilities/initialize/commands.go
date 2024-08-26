@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/noahstreller/igitt/internal/operations"
 	"github.com/noahstreller/igitt/internal/operations/interactive"
 	"github.com/noahstreller/igitt/internal/utilities/logger"
 	"github.com/spf13/cobra"
@@ -25,7 +26,7 @@ func InitializeIgitt() {
 		Aliases: []string{"cln"},
 		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Cloning repository:", args[0])
+			operations.CloneRepository(args[0])
 		},
 	}
 

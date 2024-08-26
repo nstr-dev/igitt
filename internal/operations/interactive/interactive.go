@@ -107,6 +107,7 @@ func StartInteractive(rootCmd *cobra.Command) {
 
 	theme := huh.ThemeCatppuccin()
 	theme.Focused.Base.Border(lipgloss.HiddenBorder())
+	theme.Form.Border(lipgloss.NormalBorder())
 
 	err := huh.NewForm(
 		huh.NewGroup(
@@ -154,6 +155,9 @@ func StartInteractive(rootCmd *cobra.Command) {
 	if selectedCommand.Id == "op-clone" && repoUrlInput != "" {
 		logger.InfoLogger.Println("clone command selected, sending to operations")
 		operations.CloneRepository(repoUrlInput)
+	} else if selectedCommand.Id == "op-init" {
+		logger.InfoLogger.Println("init command selected, sending to operations")
+		operations.InitRepository()
 	}
 
 }

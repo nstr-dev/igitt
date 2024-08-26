@@ -9,6 +9,6 @@ import (
 
 func CloneRepository(repoUrl string) {
 	fmt.Println("Cloning repository from " + repoUrl)
-	out, out2 := exec.Command("git", "clone", repoUrl).Output()
-	logger.InfoLogger.Println(out, out2)
+	byteOut, errOut := exec.Command("git", "clone", repoUrl).Output()
+	logger.InfoLogger.Println("Cloning:", errOut, byteOut)
 }
