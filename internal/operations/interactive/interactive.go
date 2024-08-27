@@ -45,6 +45,7 @@ type Command struct {
 type CommandFlowResult struct {
 	SelectedCommand Command
 	RepoUrlInput    string
+	GitAddArguments string
 }
 
 const iconWidth = 3
@@ -97,6 +98,7 @@ func StartInteractive(rootCmd *cobra.Command) {
 	commandFlowResult := CommandFlowResult{
 		SelectedCommand: Command{Id: "none"},
 		RepoUrlInput:    "",
+		GitAddArguments: "",
 	}
 
 	_ = json.Unmarshal(commandJSON, &commands)
@@ -163,8 +165,6 @@ func StartInteractive(rootCmd *cobra.Command) {
 }
 
 func runResultingCommand(commandFlow CommandFlowResult) {
-	printAllCommandIds()
-
 	if commandFlow.SelectedCommand.Id == "op-clone" && commandFlow.RepoUrlInput != "" {
 		logger.InfoLogger.Println("clone command selected, sending to operations")
 		git.CloneRepository(commandFlow.RepoUrlInput)
@@ -189,12 +189,9 @@ func runResultingCommand(commandFlow CommandFlowResult) {
 		return
 	}
 
-}
-
-func printAllCommandIds() {
-	var commands []Command
-	_ = json.Unmarshal(commandJSON, &commands)
-	for _, c := range commands {
-		fmt.Println(c.Id)
+	if commandFlow.SelectedCommand.Id == "op-add" && commandFlow.GitAddArguments != "" {
+		logger.InfoLogger.Println("add command selected, sending to operations")
+		git.AddChanges(commandFlow.GitAddArguments)
+		return
 	}
 }

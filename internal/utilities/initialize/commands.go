@@ -55,11 +55,21 @@ func InitializeIgitt() {
 	}
 
 	var commitCmd = &cobra.Command{
-		Use:   "commit",
-		Short: "Record changes to the repository",
-		Args:  cobra.MinimumNArgs(1),
+		Use:     "commit",
+		Short:   "(cmt) Record changes to the repository",
+		Args:    cobra.MinimumNArgs(1),
+		Aliases: []string{"cmt"},
 		Run: func(cmd *cobra.Command, args []string) {
 			git.CommitChanges(args[0])
+		},
+	}
+
+	var gitAddCmd = &cobra.Command{
+		Use:     "add",
+		Short:   "(a, +) Add file contents to the index",
+		Aliases: []string{"a", "+"},
+		Run: func(cmd *cobra.Command, args []string) {
+			git.AddChanges(args[0])
 		},
 	}
 
@@ -92,6 +102,7 @@ func InitializeIgitt() {
 		cloneCmd,
 		initCmd,
 		interactiveCmd,
+		gitAddCmd,
 		pullCmd,
 		pushCmd,
 		commitCmd,

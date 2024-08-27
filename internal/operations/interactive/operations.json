@@ -22,6 +22,28 @@
     "nextStepTitle": "None"
   },
   {
+    "id": "op-commit",
+    "name": "Commit",
+    "shortcut": "cmt",
+    "description": "Record changes to the repository",
+    "icon": "✎",
+    "icon_emoji": "✏️",
+    "icon_nerdfont": "",
+    "nextStep": "none",
+    "nextStepTitle": "None"
+  },
+  {
+    "id": "op-add",
+    "name": "Add",
+    "shortcut": "a, +",
+    "description": "Add changes to the index (staging area) before committing",
+    "icon": "+",
+    "icon_emoji": "➕",
+    "icon_nerdfont": "",
+    "nextStep": "none",
+    "nextStepTitle": "None"
+  },
+  {
     "id": "op-pull",
     "name": "Pull",
     "shortcut": "pl",
