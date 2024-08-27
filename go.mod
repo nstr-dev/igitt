@@ -1,6 +1,6 @@
 module github.com/noahstreller/igitt
 
-go 1.23.0
+go 1.23
 
 require (
 	github.com/charmbracelet/huh v0.5.2
