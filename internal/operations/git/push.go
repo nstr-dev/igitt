@@ -9,6 +9,6 @@ import (
 
 func PushRemote() {
 	fmt.Println("Pushing to remote repository")
-	byteOut, errOut := exec.Command("git", "push").Output()
-	logger.InfoLogger.Println("Pushing to remote repository:", errOut, byteOut)
+	byteOut, errOut := exec.Command("git", "push").CombinedOutput()
+	logger.InfoLogger.Println("Pushing to remote repository:", errOut, string(byteOut))
 }

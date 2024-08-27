@@ -9,6 +9,6 @@ import (
 
 func PullRemote() {
 	fmt.Println("Pulling from remote repository")
-	byteOut, errOut := exec.Command("git", "pull").Output()
-	logger.InfoLogger.Println("Pulling from remote repository:", errOut, byteOut)
+	byteOut, errOut := exec.Command("git", "pull").CombinedOutput()
+	logger.InfoLogger.Println("Pulling from remote repository:", errOut, string(byteOut))
 }

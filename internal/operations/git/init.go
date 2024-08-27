@@ -14,6 +14,6 @@ func InitRepository() {
 		logger.ErrorLogger.Println(err)
 	}
 	fmt.Println("Initializing repository in" + mydir)
-	byteOut, errOut := exec.Command("git", "init").Output()
-	logger.InfoLogger.Println("Initializing Git repository:", errOut, byteOut)
+	byteOut, errOut := exec.Command("git", "init").CombinedOutput()
+	logger.InfoLogger.Println("Initializing Git repository:", errOut, string(byteOut))
 }

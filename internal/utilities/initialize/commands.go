@@ -3,6 +3,7 @@ package initialize
 import (
 	"os"
 
+	"github.com/noahstreller/igitt/internal/operations"
 	"github.com/noahstreller/igitt/internal/operations/git"
 	"github.com/noahstreller/igitt/internal/operations/interactive"
 	"github.com/noahstreller/igitt/internal/utilities/logger"
@@ -53,12 +54,30 @@ func InitializeIgitt() {
 		},
 	}
 
+	var commitCmd = &cobra.Command{
+		Use:   "commit",
+		Short: "Record changes to the repository",
+		Args:  cobra.MinimumNArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			git.CommitChanges(args[0])
+		},
+	}
+
 	var interactiveCmd = &cobra.Command{
 		Use:     "interactive",
 		Short:   "(i) Enter interactive mode",
 		Aliases: []string{"i"},
 		Run: func(cmd *cobra.Command, args []string) {
 			interactive.StartInteractive(rootCmd)
+		},
+	}
+
+	var createAliasScripts = &cobra.Command{
+		Use:     "mkalias",
+		Short:   "Create scripts to use igt as an alias for igitt",
+		Aliases: []string{"igt"},
+		Run: func(cmd *cobra.Command, args []string) {
+			operations.CreateAliasScripts()
 		},
 	}
 
@@ -75,6 +94,8 @@ func InitializeIgitt() {
 		interactiveCmd,
 		pullCmd,
 		pushCmd,
+		commitCmd,
+		createAliasScripts,
 	)
 	rootCmd.Execute()
 }
