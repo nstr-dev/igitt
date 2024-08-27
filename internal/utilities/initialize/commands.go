@@ -108,5 +108,8 @@ func InitializeIgitt() {
 		commitCmd,
 		createAliasScripts,
 	)
-	rootCmd.Execute()
+	err := rootCmd.Execute()
+	if err != nil {
+		logger.ErrorLogger.Fatal(err)
+	}
 }
