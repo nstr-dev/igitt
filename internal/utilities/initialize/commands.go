@@ -1,8 +1,10 @@
 package initialize
 
 import (
+	"fmt"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/noahstreller/igitt/internal/operations"
 	"github.com/noahstreller/igitt/internal/operations/git"
 	"github.com/noahstreller/igitt/internal/operations/interactive"
@@ -13,7 +15,7 @@ import (
 func InitializeIgitt() {
 	var rootCmd = &cobra.Command{
 		Use:   "igitt",
-		Short: "Igitt is a supercharged Git client with a CLI.",
+		Short: "Igitt is an interactive Git client with a CLI.",
 		Long:  `Igitt supercharges your Git experience with an interactive CLI. Designed to enhance learning and streamline workflows, it offers detailed command descriptions and efficient shortcuts for a faster, more intuitive Git journey.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			logger.InfoLogger.Println("igitt was called without arguments")
@@ -78,7 +80,7 @@ func InitializeIgitt() {
 		Short:   "(i) Enter interactive mode",
 		Aliases: []string{"i"},
 		Run: func(cmd *cobra.Command, args []string) {
-			interactive.StartInteractive(rootCmd)
+			interactive.StartInteractive()
 		},
 	}
 
@@ -93,8 +95,8 @@ func InitializeIgitt() {
 
 	cobra.OnInitialize(func() {
 		if len(os.Args) == 1 {
-			rootCmd.Help()
-			os.Exit(0)
+			fmt.Println(color.RedString("No arguments provided."))
+			// interactive.StartInteractive()
 		}
 	})
 
