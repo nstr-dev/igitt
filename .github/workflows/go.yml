@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        goos: [linux, windows, darwin]
+        goos: [linux, windows]
         goarch: [amd64, arm64]
 
     steps:
@@ -29,7 +29,7 @@ jobs:
           echo "GOARCH=${{ matrix.goarch }}" >> $GITHUB_ENV
 
       - name: Build
-        run: go build -v -o igitt-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/igitt
+        run: go build -v -o igitt ./cmd/igitt
 
       - name: Test
         run: go test -v ./...
@@ -43,6 +43,6 @@ jobs:
         uses: actions/upload-artifact@v4.3.6
         with:
           name: igitt-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: .
+          path: igitt
           # name: igitt-${{ matrix.goos }}-${{ matrix.goarch }}
           # path: igitt-${{ matrix.goos }}-${{ matrix.goarch }}
