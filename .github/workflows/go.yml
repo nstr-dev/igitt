@@ -25,4 +25,15 @@ jobs:
       run: go build -v ./...
 
     - name: Test
-      run: go test -v ./...
+      run: go test -v ./...  
+
+    - name: debug
+      run: tree .
+      
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v4.3.6
+      with:
+        name: igitt
+        # A file, directory or wildcard pattern that describes what to upload
+        path: .
+          
