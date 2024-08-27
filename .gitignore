@@ -26,3 +26,7 @@ go.work.sum
 
 # log file
 igitt.exe.log
+
+# scripts
+igt
+igt.cmd
