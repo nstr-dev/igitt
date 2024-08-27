@@ -10,7 +10,6 @@ import (
 	"github.com/noahstreller/igitt/internal/operations/git"
 	"github.com/noahstreller/igitt/internal/utilities/logger"
 	"github.com/rivo/uniseg"
-	"github.com/spf13/cobra"
 
 	_ "embed"
 )
@@ -92,7 +91,7 @@ func getLinkIcon(variant IconType) string {
 	return ""
 }
 
-func StartInteractive(rootCmd *cobra.Command) {
+func StartInteractive() {
 	var commands []Command
 
 	commandFlowResult := CommandFlowResult{
