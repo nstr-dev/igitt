@@ -1,10 +1,9 @@
 package initialize
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/noahstreller/igitt/internal/operations"
+	"github.com/noahstreller/igitt/internal/operations/git"
 	"github.com/noahstreller/igitt/internal/operations/interactive"
 	"github.com/noahstreller/igitt/internal/utilities/logger"
 	"github.com/spf13/cobra"
@@ -26,7 +25,7 @@ func InitializeIgitt() {
 		Aliases: []string{"cln"},
 		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			operations.CloneRepository(args[0])
+			git.CloneRepository(args[0])
 		},
 	}
 
@@ -34,7 +33,23 @@ func InitializeIgitt() {
 		Use:   "init",
 		Short: "Create an empty Git repository or reinitialize an existing one",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Initializing a new repository")
+			git.InitRepository()
+		},
+	}
+
+	var pullCmd = &cobra.Command{
+		Use:   "pull",
+		Short: "Fetch from and integrate with another repository or a local branch",
+		Run: func(cmd *cobra.Command, args []string) {
+			git.PullRemote()
+		},
+	}
+
+	var pushCmd = &cobra.Command{
+		Use:   "push",
+		Short: "Update remote refs along with associated objects",
+		Run: func(cmd *cobra.Command, args []string) {
+			git.PushRemote()
 		},
 	}
 
@@ -54,6 +69,12 @@ func InitializeIgitt() {
 		}
 	})
 
-	rootCmd.AddCommand(cloneCmd, initCmd, interactiveCmd)
+	rootCmd.AddCommand(
+		cloneCmd,
+		initCmd,
+		interactiveCmd,
+		pullCmd,
+		pushCmd,
+	)
 	rootCmd.Execute()
 }

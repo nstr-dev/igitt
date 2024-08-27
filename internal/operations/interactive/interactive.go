@@ -7,7 +7,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/noahstreller/igitt/internal/operations"
+	"github.com/noahstreller/igitt/internal/operations/git"
 	"github.com/noahstreller/igitt/internal/utilities/logger"
 	"github.com/rivo/uniseg"
 	"github.com/spf13/cobra"
@@ -40,6 +40,11 @@ type Command struct {
 	Description   string `json:"description"`
 	NextStep      string `json:"nextStep"`
 	NextStepTitle string `json:"nextStepTitle"`
+}
+
+type CommandFlowResult struct {
+	SelectedCommand Command
+	RepoUrlInput    string
 }
 
 const iconWidth = 3
@@ -88,9 +93,11 @@ func getLinkIcon(variant IconType) string {
 
 func StartInteractive(rootCmd *cobra.Command) {
 	var commands []Command
-	var selectedCommand Command
 
-	var repoUrlInput string
+	commandFlowResult := CommandFlowResult{
+		SelectedCommand: Command{Id: "none"},
+		RepoUrlInput:    "",
+	}
 
 	_ = json.Unmarshal(commandJSON, &commands)
 	commandOptions := make([]huh.Option[Command], len(commands))
@@ -116,13 +123,13 @@ func StartInteractive(rootCmd *cobra.Command) {
 				Filtering(true).
 				Height(20).
 				DescriptionFunc(func() string {
-					if selectedCommand.NextStep != "none" {
-						return "\n" + getTitle(selectedCommand) + ": " + selectedCommand.Description + "\n\n" + "   " + getNextStepIcon(iconVariant) + "  " + "Next step: " + selectedCommand.NextStepTitle + "\n"
+					if commandFlowResult.SelectedCommand.NextStep != "none" {
+						return "\n" + getTitle(commandFlowResult.SelectedCommand) + ": " + commandFlowResult.SelectedCommand.Description + "\n\n" + "   " + getNextStepIcon(iconVariant) + "  " + "Next step: " + commandFlowResult.SelectedCommand.NextStepTitle + "\n"
 					}
-					return "\n" + getTitle(selectedCommand) + ": " + selectedCommand.Description + "\n\n" + "   " + getNoNextStepIcon(iconVariant) + "  " + "No next steps" + "\n"
-				}, &selectedCommand).
+					return "\n" + getTitle(commandFlowResult.SelectedCommand) + ": " + commandFlowResult.SelectedCommand.Description + "\n\n" + "   " + getNoNextStepIcon(iconVariant) + "  " + "No next steps" + "\n"
+				}, &commandFlowResult.SelectedCommand).
 				Options(commandOptions...).
-				Value(&selectedCommand),
+				Value(&commandFlowResult.SelectedCommand),
 		),
 
 		huh.NewGroup(huh.NewInput().
@@ -142,9 +149,9 @@ func StartInteractive(rootCmd *cobra.Command) {
 				}
 				return nil
 			}).
-			Value(&repoUrlInput),
+			Value(&commandFlowResult.RepoUrlInput),
 		).WithHideFunc(func() bool {
-			return selectedCommand.NextStep != "op-enter-repo-url"
+			return commandFlowResult.SelectedCommand.NextStep != "op-enter-repo-url"
 		}),
 	).WithTheme(theme).Run()
 
@@ -152,12 +159,42 @@ func StartInteractive(rootCmd *cobra.Command) {
 		logger.ErrorLogger.Fatal(err)
 	}
 
-	if selectedCommand.Id == "op-clone" && repoUrlInput != "" {
+	runResultingCommand(commandFlowResult)
+}
+
+func runResultingCommand(commandFlow CommandFlowResult) {
+	printAllCommandIds()
+
+	if commandFlow.SelectedCommand.Id == "op-clone" && commandFlow.RepoUrlInput != "" {
 		logger.InfoLogger.Println("clone command selected, sending to operations")
-		operations.CloneRepository(repoUrlInput)
-	} else if selectedCommand.Id == "op-init" {
-		logger.InfoLogger.Println("init command selected, sending to operations")
-		operations.InitRepository()
+		git.CloneRepository(commandFlow.RepoUrlInput)
+		return
 	}
 
+	if commandFlow.SelectedCommand.Id == "op-init" {
+		logger.InfoLogger.Println("init command selected, sending to operations")
+		git.InitRepository()
+		return
+	}
+
+	if commandFlow.SelectedCommand.Id == "op-pull" {
+		logger.InfoLogger.Println("pull command selected, sending to operations")
+		git.PullRemote()
+		return
+	}
+
+	if commandFlow.SelectedCommand.Id == "op-push" {
+		logger.InfoLogger.Println("push command selected, sending to operations")
+		git.PushRemote()
+		return
+	}
+
+}
+
+func printAllCommandIds() {
+	var commands []Command
+	_ = json.Unmarshal(commandJSON, &commands)
+	for _, c := range commands {
+		fmt.Println(c.Id)
+	}
 }
