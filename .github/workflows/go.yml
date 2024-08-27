@@ -61,16 +61,17 @@ jobs:
           echo "GOOS=${{ matrix.goos }}" >> $GITHUB_ENV
           echo "GOARCH=${{ matrix.goarch }}" >> $GITHUB_ENV
 
-      - name: Prepare out Directory
-        run: |
-          mkdir out
-          cd out
-
       - name: Build
-        run: go build -v ../cmd/igitt
+        run: |
+          if [[ "${{ matrix.goos }}" == "windows" ]]; then \
+            go build -v -o out/igitt.exe ./cmd/igitt; \
+          else \
+            go build -v -o out/igitt ./cmd/igitt; \
+          fi
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4.3.6
         with:
           name: igitt-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: .
+          path: |
+            out/igitt*
