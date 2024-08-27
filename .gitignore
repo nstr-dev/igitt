@@ -25,4 +25,8 @@ go.work.sum
 .env
 
 # log file
-igitt.log
+igitt.exe.log
+
+# scripts
+igt
+igt.cmd
