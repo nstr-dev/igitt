@@ -110,7 +110,7 @@ func Status() {
 	}
 
 	if len(modifications) == 0 {
-		fmt.Println(color.HiGreenString("✓"), "Up to date.")
+		fmt.Println("\n", color.HiGreenString("✓"), "Up to date.")
 		return
 	}
 
