@@ -40,8 +40,8 @@
     "icon": "✎",
     "icon_emoji": "📝",
     "icon_nerdfont": "",
-    "nextStep": "none",
-    "nextStepTitle": "None"
+    "nextStep": "ns-enter-commit-message",
+    "nextStepTitle": "Enter commit message"
   },
   {
     "id": "op-add",
