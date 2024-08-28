@@ -47,6 +47,8 @@ type CommandFlowResult struct {
 	RepoUrlInput    string
 	GitAddArguments string
 	CommitMessage   string
+	SelectedBranch  string
+	BranchAction    string
 }
 
 const iconWidth = 3
@@ -105,6 +107,34 @@ func getCommitIcon(variant IconType) string {
 		return "  "
 	}
 	return "✎  "
+}
+
+func getBranchOptions() []huh.Option[string] {
+	branchResult := git.GetBranches()
+	branches := branchResult.Branches
+
+	branchOptions := make([]huh.Option[string], len(branches))
+
+	for i, b := range branches {
+		if b == branchResult.CheckedOutBranch {
+			b = fmt.Sprintf("%s*", b)
+		}
+		branchOptions[i] = huh.NewOption(b, b)
+	}
+
+	return branchOptions
+}
+
+func getBranchActionOptions() []huh.Option[string] {
+	branchActions := []string{"Check out", "Delete (wip)", "Rename (wip)"}
+
+	branchActionOptions := make([]huh.Option[string], len(branchActions))
+
+	for i, b := range branchActions {
+		branchActionOptions[i] = huh.NewOption(b, b)
+	}
+
+	return branchActionOptions
 }
 
 func StartInteractive() {
@@ -209,6 +239,26 @@ func StartInteractive() {
 		).WithHideFunc(func() bool {
 			return commandFlowResult.SelectedCommand.NextStep != "ns-enter-commit-message"
 		}),
+
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("Branch selection").
+				Description(bold("\n  Select a branch\n")).
+				Options(getBranchOptions()...).
+				Value(&commandFlowResult.SelectedBranch),
+		).WithHideFunc(func() bool {
+			return commandFlowResult.SelectedCommand.NextStep != "ns-choose-branch"
+		}),
+
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("Branch action selection").
+				Description(fmt.Sprintf("\n  Select an action for the branch %s\n", commandFlowResult.SelectedBranch)).
+				Options(getBranchActionOptions()...).
+				Value(&commandFlowResult.BranchAction),
+		).WithHideFunc(func() bool {
+			return !(commandFlowResult.SelectedBranch != "")
+		}),
 	).WithTheme(theme).WithHeight(len(commands) + 9).Run()
 
 	if err != nil {
@@ -224,10 +274,29 @@ func runResultingCommand(commandFlow CommandFlowResult) {
 		git.CloneRepository(commandFlow.RepoUrlInput)
 		return
 	}
+
 	if commandFlow.SelectedCommand.Id == "op-commit" && commandFlow.CommitMessage != "" {
 		logger.InfoLogger.Println("commit command selected, sending to operations")
 		git.CommitChanges(commandFlow.CommitMessage)
 		return
+	}
+
+	if commandFlow.SelectedCommand.Id == "op-branches" && commandFlow.SelectedBranch != "" && commandFlow.BranchAction != "" {
+		isCheckedOutAlready := strings.Contains(commandFlow.SelectedBranch, "*")
+		checkedOutBranchWithoutStar := strings.TrimPrefix(commandFlow.SelectedBranch, "*")
+
+		logger.InfoLogger.Printf("branch command selected, sending to action block, isCheckedOutAlready: %v, checkedOutBranchWithoutStar: %s\n", isCheckedOutAlready, checkedOutBranchWithoutStar)
+
+		if commandFlow.BranchAction == "Check out" && !isCheckedOutAlready {
+			logger.InfoLogger.Println("checkout command selected, sending to operations")
+			git.CheckoutBranch(commandFlow.SelectedBranch)
+			return
+		}
+		if commandFlow.BranchAction == "Check out" && isCheckedOutAlready {
+			logger.InfoLogger.Println("checkout command selected, not sending to operations, branch already checked out")
+			fmt.Println("Branch already checked out")
+			return
+		}
 	}
 
 	if commandFlow.SelectedCommand.Id == "op-init" {

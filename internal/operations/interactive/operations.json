@@ -55,6 +55,17 @@
     "nextStepTitle": "None"
   },
   {
+    "id": "op-branches",
+    "name": "Branches",
+    "shortcut": "none",
+    "description": "Manage and check out branches",
+    "icon": "⎇",
+    "icon_emoji": "🌿",
+    "icon_nerdfont": "",
+    "nextStep": "ns-choose-branch",
+    "nextStepTitle": "Choose a branch"
+  },
+  {
     "id": "op-clone",
     "name": "Clone",
     "shortcut": "cln",
