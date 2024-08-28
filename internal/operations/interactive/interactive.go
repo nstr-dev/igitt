@@ -176,6 +176,12 @@ func runResultingCommand(commandFlow CommandFlowResult) {
 		return
 	}
 
+	if commandFlow.SelectedCommand.Id == "op-status" {
+		logger.InfoLogger.Println("status command selected, sending to operations")
+		git.Status()
+		return
+	}
+
 	if commandFlow.SelectedCommand.Id == "op-pull" {
 		logger.InfoLogger.Println("pull command selected, sending to operations")
 		git.PullRemote()
