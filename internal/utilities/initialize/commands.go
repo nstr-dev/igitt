@@ -87,8 +87,9 @@ func InitializeIgitt() {
 
 	var checkoutCmd = &cobra.Command{
 		Use:     "checkout",
-		Short:   "(c) Change to a different branch",
-		Aliases: []string{"co"},
+		Short:   "(cout) Change to a different branch",
+		Args:    cobra.MinimumNArgs(1),
+		Aliases: []string{"cout"},
 		Run: func(cmd *cobra.Command, args []string) {
 			git.CheckoutBranch(args[0])
 		},
