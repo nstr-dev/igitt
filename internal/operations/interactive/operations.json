@@ -1,5 +1,16 @@
 [
   {
+    "id": "op-status",
+    "name": "Status",
+    "shortcut": "s",
+    "description": "Show changed files in the working directory",
+    "icon": "⚆⚆",
+    "icon_emoji": "👀",
+    "icon_nerdfont": "",
+    "nextStep": "ns-stage-or-unstage-changes",
+    "nextStepTitle": "Add or remove changed files to/from the staging area"
+  },
+  {
     "id": "op-clone",
     "name": "Clone",
     "shortcut": "cln",
@@ -7,7 +18,7 @@
     "icon": "⎘",
     "icon_emoji": "📂",
     "icon_nerdfont": "",
-    "nextStep": "op-enter-repo-url",
+    "nextStep": "ns-enter-repo-url",
     "nextStepTitle": "Enter remote repository URL"
   },
   {
@@ -27,7 +38,7 @@
     "shortcut": "cmt",
     "description": "Record changes to the repository",
     "icon": "✎",
-    "icon_emoji": "✏️",
+    "icon_emoji": "📝",
     "icon_nerdfont": "",
     "nextStep": "none",
     "nextStepTitle": "None"

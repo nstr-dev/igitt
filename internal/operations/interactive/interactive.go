@@ -47,9 +47,9 @@ type CommandFlowResult struct {
 	GitAddArguments string
 }
 
-const iconWidth = 3
+const iconWidth = 4
 const shortcutsEnabled = false
-const iconVariant = NerdFont
+const iconVariant = Emoji
 
 func getTitle(command Command) string {
 	if iconVariant == Emoji {
@@ -152,7 +152,7 @@ func StartInteractive() {
 			}).
 			Value(&commandFlowResult.RepoUrlInput),
 		).WithHideFunc(func() bool {
-			return commandFlowResult.SelectedCommand.NextStep != "op-enter-repo-url"
+			return commandFlowResult.SelectedCommand.NextStep != "ns-enter-repo-url"
 		}),
 	).WithTheme(theme).Run()
 
