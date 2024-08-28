@@ -191,7 +191,7 @@ func StartInteractive() {
 		).WithHideFunc(func() bool {
 			return commandFlowResult.SelectedCommand.NextStep != "ns-enter-commit-message"
 		}),
-	).WithTheme(theme).WithHeight(20).Run()
+	).WithTheme(theme).WithHeight(len(commands) + 9).Run()
 
 	if err != nil {
 		logger.ErrorLogger.Fatal(err)
