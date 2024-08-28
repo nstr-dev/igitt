@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/noahstreller/igitt/internal/utilities"
 	"github.com/noahstreller/igitt/internal/utilities/logger"
 )
 
@@ -15,5 +16,11 @@ func InitRepository() {
 	}
 	fmt.Println("Initializing repository in" + mydir)
 	byteOut, errOut := exec.Command("git", "init").CombinedOutput()
+
+	if errOut != nil {
+		logger.ErrorLogger.Println("Error initializing Git repository:", errOut, string(byteOut))
+		utilities.PrintError(string(byteOut))
+		return
+	}
 	logger.InfoLogger.Println("Initializing Git repository:", errOut, string(byteOut))
 }

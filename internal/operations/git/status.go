@@ -106,6 +106,7 @@ var FileStatuses = []ModifiedStatusInfo{
 func Status() {
 	modifications, err := getModifications()
 	if err != nil {
+		logger.ErrorLogger.Println("Failed to get modifications: ", err)
 		return
 	}
 
@@ -152,6 +153,7 @@ func getModifications() ([]FileStatus, error) {
 	status, err := runGitStatus()
 	if err != nil {
 		logger.ErrorLogger.Println("Failed previous step, aborting: ", err)
+		utilities.PrintError(status)
 		return nil, err
 	}
 
@@ -185,11 +187,11 @@ func getModifications() ([]FileStatus, error) {
 	})
 
 	return statuses, nil
-
 }
 
 func runGitStatus() (string, error) {
 	byteOut, errOut := exec.Command("git", "status", "--porcelain").CombinedOutput()
 	logger.InfoLogger.Println("Fetching git status:", errOut, string(byteOut))
+
 	return string(byteOut), errOut
 }

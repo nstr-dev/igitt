@@ -1,6 +1,11 @@
 package utilities
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/fatih/color"
+)
 
 func RemoveLastEmptyLine(text string) string {
 	lines := strings.Split(text, "\n")
@@ -11,4 +16,9 @@ func RemoveLastEmptyLine(text string) string {
 	}
 
 	return strings.Join(lines, "\n")
+}
+
+func PrintError(message string) {
+	fmt.Printf("\n%s", color.HiBlackString("=============================================================================\n\n"))
+	fmt.Printf("%s  There was an issue. Received following message from Git:\n\n%s\n", color.HiRedString("⚠"), color.HiRedString(message))
 }
