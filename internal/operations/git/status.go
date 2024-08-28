@@ -119,7 +119,6 @@ func Status() {
 	fmt.Println(bold("Files with changes:"))
 	fmt.Println(color.BlackString("==================="))
 
-	// Create a map for quick lookup of FileStatuses by StatusLetter
 	statusMap := make(map[string]ModifiedStatusInfo)
 	for _, status := range FileStatuses {
 		statusMap[status.StatusLetter] = status
@@ -127,7 +126,6 @@ func Status() {
 
 	maxWidth := 0
 
-	// Calculate maxWidth
 	for _, modification := range modifications {
 		if status, exists := statusMap[modification.StatusLetter]; exists {
 			color := color.New(status.StatusColor).SprintFunc()
@@ -138,7 +136,6 @@ func Status() {
 		}
 	}
 
-	// Print modifications with formatted output
 	for _, modification := range modifications {
 		if status, exists := statusMap[modification.StatusLetter]; exists {
 			color := color.New(status.StatusColor).SprintFunc()
@@ -184,7 +181,6 @@ func getModifications() ([]FileStatus, error) {
 	}
 
 	sort.Slice(statuses, func(i, j int) bool {
-		// Sort by the status title using the map
 		return statusTitleMap[statuses[i].StatusLetter] < statusTitleMap[statuses[j].StatusLetter]
 	})
 
