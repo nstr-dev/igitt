@@ -7,8 +7,8 @@
     "icon": "⚆⚆",
     "icon_emoji": "👀",
     "icon_nerdfont": "",
-    "nextStep": "ns-stage-or-unstage-changes",
-    "nextStepTitle": "Add or remove changed files to/from the staging area"
+    "nextStep": "none",
+    "nextStepTitle": "None"
   },
   {
     "id": "op-clone",
@@ -40,8 +40,8 @@
     "icon": "✎",
     "icon_emoji": "📝",
     "icon_nerdfont": "",
-    "nextStep": "none",
-    "nextStepTitle": "None"
+    "nextStep": "ns-enter-commit-message",
+    "nextStepTitle": "Enter commit message"
   },
   {
     "id": "op-add",

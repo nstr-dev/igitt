@@ -5,7 +5,9 @@ import (
 	"os/exec"
 	"sort"
 	"strings"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
 	"github.com/noahstreller/igitt/internal/utilities"
 	"github.com/noahstreller/igitt/internal/utilities/logger"
@@ -106,6 +108,7 @@ var FileStatuses = []ModifiedStatusInfo{
 func Status() {
 	modifications, err := getModifications()
 	if err != nil {
+		logger.ErrorLogger.Println("Failed to get modifications: ", err)
 		return
 	}
 
@@ -119,7 +122,6 @@ func Status() {
 	fmt.Println(bold("Files with changes:"))
 	fmt.Println(color.BlackString("==================="))
 
-	// Create a map for quick lookup of FileStatuses by StatusLetter
 	statusMap := make(map[string]ModifiedStatusInfo)
 	for _, status := range FileStatuses {
 		statusMap[status.StatusLetter] = status
@@ -127,7 +129,6 @@ func Status() {
 
 	maxWidth := 0
 
-	// Calculate maxWidth
 	for _, modification := range modifications {
 		if status, exists := statusMap[modification.StatusLetter]; exists {
 			color := color.New(status.StatusColor).SprintFunc()
@@ -138,7 +139,6 @@ func Status() {
 		}
 	}
 
-	// Print modifications with formatted output
 	for _, modification := range modifications {
 		if status, exists := statusMap[modification.StatusLetter]; exists {
 			color := color.New(status.StatusColor).SprintFunc()
@@ -155,6 +155,7 @@ func getModifications() ([]FileStatus, error) {
 	status, err := runGitStatus()
 	if err != nil {
 		logger.ErrorLogger.Println("Failed previous step, aborting: ", err)
+		utilities.PrintError(status)
 		return nil, err
 	}
 
@@ -184,16 +185,19 @@ func getModifications() ([]FileStatus, error) {
 	}
 
 	sort.Slice(statuses, func(i, j int) bool {
-		// Sort by the status title using the map
 		return statusTitleMap[statuses[i].StatusLetter] < statusTitleMap[statuses[j].StatusLetter]
 	})
 
 	return statuses, nil
-
 }
 
 func runGitStatus() (string, error) {
+	progressIndicator := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+	progressIndicator.Start()
 	byteOut, errOut := exec.Command("git", "status", "--porcelain").CombinedOutput()
+	progressIndicator.Stop()
+
 	logger.InfoLogger.Println("Fetching git status:", errOut, string(byteOut))
+
 	return string(byteOut), errOut
 }

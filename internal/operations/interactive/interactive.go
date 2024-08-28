@@ -45,11 +45,12 @@ type CommandFlowResult struct {
 	SelectedCommand Command
 	RepoUrlInput    string
 	GitAddArguments string
+	CommitMessage   string
 }
 
 const iconWidth = 4
 const shortcutsEnabled = false
-const iconVariant = Emoji
+const iconVariant = NerdFont
 
 func getTitle(command Command) string {
 	if iconVariant == Emoji {
@@ -91,6 +92,16 @@ func getLinkIcon(variant IconType) string {
 	return ""
 }
 
+func getCommitIcon(variant IconType) string {
+	if variant == Emoji {
+		return "📝  "
+	}
+	if variant == NerdFont {
+		return "  "
+	}
+	return "✎  "
+}
+
 func StartInteractive() {
 	var commands []Command
 
@@ -98,6 +109,7 @@ func StartInteractive() {
 		SelectedCommand: Command{Id: "none"},
 		RepoUrlInput:    "",
 		GitAddArguments: "",
+		CommitMessage:   "",
 	}
 
 	_ = json.Unmarshal(commandJSON, &commands)
@@ -122,39 +134,64 @@ func StartInteractive() {
 			huh.NewSelect[Command]().
 				Title("Igitt").
 				Filtering(true).
-				Height(20).
 				DescriptionFunc(func() string {
 					if commandFlowResult.SelectedCommand.NextStep != "none" {
-						return "\n" + getTitle(commandFlowResult.SelectedCommand) + ": " + commandFlowResult.SelectedCommand.Description + "\n\n" + "   " + getNextStepIcon(iconVariant) + "  " + "Next step: " + commandFlowResult.SelectedCommand.NextStepTitle + "\n"
+						return "\n" + getTitle(commandFlowResult.SelectedCommand) + ": " + commandFlowResult.SelectedCommand.Description + "\n\n" + "   " + getNextStepIcon(iconVariant) + "  " + "Next step: " + commandFlowResult.SelectedCommand.NextStepTitle + "\n\n"
 					}
-					return "\n" + getTitle(commandFlowResult.SelectedCommand) + ": " + commandFlowResult.SelectedCommand.Description + "\n\n" + "   " + getNoNextStepIcon(iconVariant) + "  " + "No next steps" + "\n"
+					return "\n" + getTitle(commandFlowResult.SelectedCommand) + ": " + commandFlowResult.SelectedCommand.Description + "\n\n" + "   " + getNoNextStepIcon(iconVariant) + "  " + "No next steps" + "\n\n"
 				}, &commandFlowResult.SelectedCommand).
 				Options(commandOptions...).
 				Value(&commandFlowResult.SelectedCommand),
 		),
 
-		huh.NewGroup(huh.NewInput().
-			Title("Link to Git repository").
-			Description("\n"+getLinkIcon(iconVariant)+"Enter the link to your repository here.\n").
-			Suggestions([]string{
-				"https://github.com/",
-				"https://gitlab.com/",
-				"https://bitbucket.org/",
-				"https://sourcehut.org/",
-				"https://codeberg.org/",
-				"https://gitea.io/",
-			}).
-			Validate(func(s string) error {
-				if s == "" {
-					return fmt.Errorf("if you're ready to clone, enter a repository URL")
-				}
-				return nil
-			}).
-			Value(&commandFlowResult.RepoUrlInput),
+		huh.NewGroup(
+			huh.NewInput().
+				Title("Link to Git repository").
+				Description("\n"+getLinkIcon(iconVariant)+"Enter the link to your repository here.\n").
+				Suggestions([]string{
+					"https://github.com/",
+					"https://gitlab.com/",
+					"https://bitbucket.org/",
+					"https://sourcehut.org/",
+					"https://codeberg.org/",
+					"https://gitea.io/",
+				}).
+				Validate(func(s string) error {
+					if s == "" {
+						return fmt.Errorf("if you're ready to clone, enter a repository URL")
+					}
+					return nil
+				}).
+				Value(&commandFlowResult.RepoUrlInput),
 		).WithHideFunc(func() bool {
 			return commandFlowResult.SelectedCommand.NextStep != "ns-enter-repo-url"
 		}),
-	).WithTheme(theme).Run()
+
+		huh.NewGroup(
+			huh.NewInput().
+				Title("Commit message").
+				Description("\n"+getCommitIcon(iconVariant)+"Type a short description to the commit.\n").
+				Suggestions([]string{
+					"feat: ",
+					"fix: ",
+					"docs: ",
+					"style: ",
+					"refactor: ",
+					"perf: ",
+					"test: ",
+					"chore: ",
+				}).
+				Validate(func(s string) error {
+					if s == "" {
+						return fmt.Errorf("please enter a commit message")
+					}
+					return nil
+				}).
+				Value(&commandFlowResult.CommitMessage),
+		).WithHideFunc(func() bool {
+			return commandFlowResult.SelectedCommand.NextStep != "ns-enter-commit-message"
+		}),
+	).WithTheme(theme).WithHeight(20).Run()
 
 	if err != nil {
 		logger.ErrorLogger.Fatal(err)
@@ -169,10 +206,21 @@ func runResultingCommand(commandFlow CommandFlowResult) {
 		git.CloneRepository(commandFlow.RepoUrlInput)
 		return
 	}
+	if commandFlow.SelectedCommand.Id == "op-commit" && commandFlow.CommitMessage != "" {
+		logger.InfoLogger.Println("commit command selected, sending to operations")
+		git.CommitChanges(commandFlow.CommitMessage)
+		return
+	}
 
 	if commandFlow.SelectedCommand.Id == "op-init" {
 		logger.InfoLogger.Println("init command selected, sending to operations")
 		git.InitRepository()
+		return
+	}
+
+	if commandFlow.SelectedCommand.Id == "op-status" {
+		logger.InfoLogger.Println("status command selected, sending to operations")
+		git.Status()
 		return
 	}
 

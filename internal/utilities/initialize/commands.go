@@ -70,6 +70,7 @@ func InitializeIgitt() {
 		Use:     "add",
 		Short:   "(a, +) Add file contents to the index",
 		Aliases: []string{"a", "+"},
+		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			git.AddChanges(args[0])
 		},
