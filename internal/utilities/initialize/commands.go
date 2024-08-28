@@ -75,6 +75,15 @@ func InitializeIgitt() {
 		},
 	}
 
+	var statusCmd = &cobra.Command{
+		Use:     "status",
+		Short:   "(s) Show changed files",
+		Aliases: []string{"s"},
+		Run: func(cmd *cobra.Command, args []string) {
+			git.Status()
+		},
+	}
+
 	var interactiveCmd = &cobra.Command{
 		Use:     "interactive",
 		Short:   "(i) Enter interactive mode",
@@ -107,6 +116,7 @@ func InitializeIgitt() {
 		gitAddCmd,
 		pullCmd,
 		pushCmd,
+		statusCmd,
 		commitCmd,
 		createAliasScripts,
 	)
