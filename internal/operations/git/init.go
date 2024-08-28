@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/noahstreller/igitt/internal/utilities"
 	"github.com/noahstreller/igitt/internal/utilities/logger"
 )
@@ -15,7 +17,11 @@ func InitRepository() {
 		logger.ErrorLogger.Println(err)
 	}
 	fmt.Println("Initializing repository in" + mydir)
+
+	progressIndicator := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+	progressIndicator.Start()
 	byteOut, errOut := exec.Command("git", "init").CombinedOutput()
+	progressIndicator.Stop()
 
 	if errOut != nil {
 		logger.ErrorLogger.Println("Error initializing Git repository:", errOut, string(byteOut))

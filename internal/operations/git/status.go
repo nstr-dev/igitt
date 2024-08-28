@@ -5,7 +5,9 @@ import (
 	"os/exec"
 	"sort"
 	"strings"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
 	"github.com/noahstreller/igitt/internal/utilities"
 	"github.com/noahstreller/igitt/internal/utilities/logger"
@@ -190,7 +192,11 @@ func getModifications() ([]FileStatus, error) {
 }
 
 func runGitStatus() (string, error) {
+	progressIndicator := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+	progressIndicator.Start()
 	byteOut, errOut := exec.Command("git", "status", "--porcelain").CombinedOutput()
+	progressIndicator.Stop()
+
 	logger.InfoLogger.Println("Fetching git status:", errOut, string(byteOut))
 
 	return string(byteOut), errOut
