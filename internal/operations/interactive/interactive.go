@@ -257,7 +257,7 @@ func StartInteractive() {
 				Options(getBranchActionOptions()...).
 				Value(&commandFlowResult.BranchAction),
 		).WithHideFunc(func() bool {
-			return !(commandFlowResult.SelectedBranch != "")
+			return commandFlowResult.SelectedCommand.NextStep != "ns-choose-branch" || !(commandFlowResult.SelectedBranch != "")
 		}),
 	).WithTheme(theme).WithHeight(len(commands) + 9).Run()
 
