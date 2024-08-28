@@ -85,6 +85,16 @@ func InitializeIgitt() {
 		},
 	}
 
+	var checkoutCmd = &cobra.Command{
+		Use:     "checkout",
+		Short:   "(cout) Change to a different branch",
+		Args:    cobra.MinimumNArgs(1),
+		Aliases: []string{"cout"},
+		Run: func(cmd *cobra.Command, args []string) {
+			git.CheckoutBranch(args[0])
+		},
+	}
+
 	var interactiveCmd = &cobra.Command{
 		Use:     "interactive",
 		Short:   "(i) Enter interactive mode",
@@ -118,6 +128,7 @@ func InitializeIgitt() {
 		pullCmd,
 		pushCmd,
 		statusCmd,
+		checkoutCmd,
 		commitCmd,
 		createAliasScripts,
 	)

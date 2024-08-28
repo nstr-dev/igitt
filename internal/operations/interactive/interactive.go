@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/fatih/color"
 	"github.com/noahstreller/igitt/internal/operations/git"
 	"github.com/noahstreller/igitt/internal/utilities/logger"
 	"github.com/rivo/uniseg"
@@ -46,18 +47,24 @@ type CommandFlowResult struct {
 	RepoUrlInput    string
 	GitAddArguments string
 	CommitMessage   string
+	SelectedBranch  string
+	BranchAction    string
 }
 
-const iconWidth = 4
+const iconWidth = 3
 const shortcutsEnabled = false
 const iconVariant = NerdFont
 
+func bold(s string) string {
+	return color.New(color.Bold).Sprint(s)
+}
+
 func getTitle(command Command) string {
 	if iconVariant == Emoji {
-		return command.IconEmoji + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconEmoji)) + command.Name
+		return command.IconEmoji + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconEmoji)) + bold(command.Name)
 	}
 	if iconVariant == NerdFont {
-		return command.IconNerdFont + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconNerdFont)) + command.Name
+		return command.IconNerdFont + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconNerdFont)) + bold(command.Name)
 	}
 	return command.Icon + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.Icon)) + command.Name
 }
@@ -102,6 +109,34 @@ func getCommitIcon(variant IconType) string {
 	return "✎  "
 }
 
+func getBranchOptions() []huh.Option[string] {
+	branchResult := git.GetBranches()
+	branches := branchResult.Branches
+
+	branchOptions := make([]huh.Option[string], len(branches))
+
+	for i, b := range branches {
+		if b == branchResult.CheckedOutBranch {
+			b = fmt.Sprintf("%s*", b)
+		}
+		branchOptions[i] = huh.NewOption(b, b)
+	}
+
+	return branchOptions
+}
+
+func getBranchActionOptions() []huh.Option[string] {
+	branchActions := []string{"Check out", "Delete (wip)", "Rename (wip)"}
+
+	branchActionOptions := make([]huh.Option[string], len(branchActions))
+
+	for i, b := range branchActions {
+		branchActionOptions[i] = huh.NewOption(b, b)
+	}
+
+	return branchActionOptions
+}
+
 func StartInteractive() {
 	var commands []Command
 
@@ -136,9 +171,22 @@ func StartInteractive() {
 				Filtering(true).
 				DescriptionFunc(func() string {
 					if commandFlowResult.SelectedCommand.NextStep != "none" {
-						return "\n" + getTitle(commandFlowResult.SelectedCommand) + ": " + commandFlowResult.SelectedCommand.Description + "\n\n" + "   " + getNextStepIcon(iconVariant) + "  " + "Next step: " + commandFlowResult.SelectedCommand.NextStepTitle + "\n\n"
+						return fmt.Sprintf(
+							"\n%s: %s\n\n   %s  %s\n\n",
+							getTitle(commandFlowResult.SelectedCommand),
+							commandFlowResult.SelectedCommand.Description,
+							getNextStepIcon(iconVariant),
+							bold("Next step: "+commandFlowResult.SelectedCommand.NextStepTitle),
+						)
 					}
-					return "\n" + getTitle(commandFlowResult.SelectedCommand) + ": " + commandFlowResult.SelectedCommand.Description + "\n\n" + "   " + getNoNextStepIcon(iconVariant) + "  " + "No next steps" + "\n\n"
+
+					return fmt.Sprintf(
+						"\n%s: %s\n\n   %s  %s next steps\n\n",
+						getTitle(commandFlowResult.SelectedCommand),
+						commandFlowResult.SelectedCommand.Description,
+						getNoNextStepIcon(iconVariant),
+						bold("No"),
+					)
 				}, &commandFlowResult.SelectedCommand).
 				Options(commandOptions...).
 				Value(&commandFlowResult.SelectedCommand),
@@ -191,7 +239,27 @@ func StartInteractive() {
 		).WithHideFunc(func() bool {
 			return commandFlowResult.SelectedCommand.NextStep != "ns-enter-commit-message"
 		}),
-	).WithTheme(theme).WithHeight(20).Run()
+
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("Branch selection").
+				Description(bold("\n  Select a branch\n")).
+				Options(getBranchOptions()...).
+				Value(&commandFlowResult.SelectedBranch),
+		).WithHideFunc(func() bool {
+			return commandFlowResult.SelectedCommand.NextStep != "ns-choose-branch"
+		}),
+
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("Branch action selection").
+				Description(fmt.Sprintf("\n  Select an action for the branch %s\n", commandFlowResult.SelectedBranch)).
+				Options(getBranchActionOptions()...).
+				Value(&commandFlowResult.BranchAction),
+		).WithHideFunc(func() bool {
+			return commandFlowResult.SelectedCommand.NextStep != "ns-choose-branch" || !(commandFlowResult.SelectedBranch != "")
+		}),
+	).WithTheme(theme).WithHeight(len(commands) + 9).Run()
 
 	if err != nil {
 		logger.ErrorLogger.Fatal(err)
@@ -206,10 +274,29 @@ func runResultingCommand(commandFlow CommandFlowResult) {
 		git.CloneRepository(commandFlow.RepoUrlInput)
 		return
 	}
+
 	if commandFlow.SelectedCommand.Id == "op-commit" && commandFlow.CommitMessage != "" {
 		logger.InfoLogger.Println("commit command selected, sending to operations")
 		git.CommitChanges(commandFlow.CommitMessage)
 		return
+	}
+
+	if commandFlow.SelectedCommand.Id == "op-branches" && commandFlow.SelectedBranch != "" && commandFlow.BranchAction != "" {
+		isCheckedOutAlready := strings.Contains(commandFlow.SelectedBranch, "*")
+		checkedOutBranchWithoutStar := strings.TrimPrefix(commandFlow.SelectedBranch, "*")
+
+		logger.InfoLogger.Printf("branch command selected, sending to action block, isCheckedOutAlready: %v, checkedOutBranchWithoutStar: %s\n", isCheckedOutAlready, checkedOutBranchWithoutStar)
+
+		if commandFlow.BranchAction == "Check out" && !isCheckedOutAlready {
+			logger.InfoLogger.Println("checkout command selected, sending to operations")
+			git.CheckoutBranch(commandFlow.SelectedBranch)
+			return
+		}
+		if commandFlow.BranchAction == "Check out" && isCheckedOutAlready {
+			logger.InfoLogger.Println("checkout command selected, not sending to operations, branch already checked out")
+			fmt.Println("Branch already checked out")
+			return
+		}
 	}
 
 	if commandFlow.SelectedCommand.Id == "op-init" {
