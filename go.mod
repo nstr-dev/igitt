@@ -13,6 +13,7 @@ require (
 require (
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
+	github.com/briandowns/spinner v1.23.1 // indirect
 	github.com/catppuccin/go v0.2.0 // indirect
 	github.com/charmbracelet/bubbles v0.19.0 // indirect
 	github.com/charmbracelet/bubbletea v0.27.1 // indirect
@@ -34,5 +35,6 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.24.0 // indirect
+	golang.org/x/term v0.1.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
 )
