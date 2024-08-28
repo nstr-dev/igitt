@@ -104,15 +104,20 @@ var FileStatuses = []ModifiedStatusInfo{
 }
 
 func Status() {
-	bold := color.New(color.Bold).SprintFunc()
-	fmt.Println(color.BlackString("==================="))
-	fmt.Println(bold("Files with changes:"))
-	fmt.Println(color.BlackString("==================="))
-
 	modifications, err := getModifications()
 	if err != nil {
 		return
 	}
+
+	if len(modifications) == 0 {
+		fmt.Println(color.HiGreenString("✓"), "Up to date.")
+		return
+	}
+
+	bold := color.New(color.Bold).SprintFunc()
+	fmt.Println(color.BlackString("==================="))
+	fmt.Println(bold("Files with changes:"))
+	fmt.Println(color.BlackString("==================="))
 
 	// Create a map for quick lookup of FileStatuses by StatusLetter
 	statusMap := make(map[string]ModifiedStatusInfo)
@@ -154,12 +159,16 @@ func getModifications() ([]FileStatus, error) {
 	}
 
 	statusWithoutEmptyLine := utilities.RemoveLastEmptyLine(status)
-
 	statusLines := strings.Split(statusWithoutEmptyLine, "\n")
 
 	if len(statusLines) == 0 {
-		fmt.Println("No changes.")
 		return statuses, nil
+	}
+
+	if len(statusLines) == 1 {
+		if statusLines[0] == "" {
+			return []FileStatus{}, nil
+		}
 	}
 
 	for _, line := range statusLines {
