@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/fatih/color"
 	"github.com/noahstreller/igitt/internal/operations/git"
 	"github.com/noahstreller/igitt/internal/utilities/logger"
 	"github.com/rivo/uniseg"
@@ -48,16 +49,20 @@ type CommandFlowResult struct {
 	CommitMessage   string
 }
 
-const iconWidth = 4
+const iconWidth = 3
 const shortcutsEnabled = false
 const iconVariant = NerdFont
 
+func bold(s string) string {
+	return color.New(color.Bold).Sprint(s)
+}
+
 func getTitle(command Command) string {
 	if iconVariant == Emoji {
-		return command.IconEmoji + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconEmoji)) + command.Name
+		return command.IconEmoji + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconEmoji)) + bold(command.Name)
 	}
 	if iconVariant == NerdFont {
-		return command.IconNerdFont + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconNerdFont)) + command.Name
+		return command.IconNerdFont + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconNerdFont)) + bold(command.Name)
 	}
 	return command.Icon + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.Icon)) + command.Name
 }
@@ -136,9 +141,22 @@ func StartInteractive() {
 				Filtering(true).
 				DescriptionFunc(func() string {
 					if commandFlowResult.SelectedCommand.NextStep != "none" {
-						return "\n" + getTitle(commandFlowResult.SelectedCommand) + ": " + commandFlowResult.SelectedCommand.Description + "\n\n" + "   " + getNextStepIcon(iconVariant) + "  " + "Next step: " + commandFlowResult.SelectedCommand.NextStepTitle + "\n\n"
+						return fmt.Sprintf(
+							"\n%s: %s\n\n   %s  %s\n\n",
+							getTitle(commandFlowResult.SelectedCommand),
+							commandFlowResult.SelectedCommand.Description,
+							getNextStepIcon(iconVariant),
+							bold("Next step: "+commandFlowResult.SelectedCommand.NextStepTitle),
+						)
 					}
-					return "\n" + getTitle(commandFlowResult.SelectedCommand) + ": " + commandFlowResult.SelectedCommand.Description + "\n\n" + "   " + getNoNextStepIcon(iconVariant) + "  " + "No next steps" + "\n\n"
+
+					return fmt.Sprintf(
+						"\n%s: %s\n\n   %s  %s next steps\n\n",
+						getTitle(commandFlowResult.SelectedCommand),
+						commandFlowResult.SelectedCommand.Description,
+						getNoNextStepIcon(iconVariant),
+						bold("No"),
+					)
 				}, &commandFlowResult.SelectedCommand).
 				Options(commandOptions...).
 				Value(&commandFlowResult.SelectedCommand),
