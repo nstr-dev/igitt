@@ -10,6 +10,7 @@ on:
 
 jobs:
   lint:
+    # run on self-hosted runner to reduce usage quota
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
@@ -26,6 +27,8 @@ jobs:
 
   test:
     needs: lint
+
+    # run on github hosted runner to avoid waste of resources
     runs-on: ubuntu-latest
 
     steps:
@@ -41,7 +44,9 @@ jobs:
 
   build:
     needs: [lint, test]
-    runs-on: ubuntu-latest
+
+    # run on self-hosted runner to reduce usage quota
+    runs-on: self-hosted
 
     strategy:
       matrix:
