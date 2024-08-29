@@ -63,7 +63,7 @@ jobs:
 
       - name: Get latest tag and short commit SHA
         run: |
-          echo "TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+          echo "LATEST_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
           echo "SHORT_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Build
@@ -77,6 +77,6 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4.3.6
         with:
-          name: igitt-${{ matrix.goos }}-${{ matrix.goarch }}-${{ env.TAG }}-${{ env.SHORT_COMMIT }}
+          name: igitt-${{ matrix.goos }}-${{ matrix.goarch }}-${{ env.LATEST_TAG }}-${{ env.SHORT_COMMIT }}
           path: |
             out/igitt*
