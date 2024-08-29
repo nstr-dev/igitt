@@ -129,6 +129,7 @@ jobs:
           files: |
             igitt-*
           tag_name: ${{ env.LATEST_TAG }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           name: "Automatic Pre-Release: ${{ env.LATEST_TAG }}-${{ env.SHORT_COMMIT }}"
           body: |
             This is an automatic pre-release build.
