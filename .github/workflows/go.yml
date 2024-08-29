@@ -102,7 +102,7 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: igitt-${{ matrix.goos }}-${{ matrix.goarch }}-${{ env.LATEST_TAG }}-${{ env.SHORT_COMMIT }}
+          name: igitt-${{ matrix.goos }}-${{ matrix.goarch }}-${{ env.LATEST_TAG }}
           path: |
             out/igitt*
 
@@ -119,6 +119,12 @@ jobs:
         with:
           pattern: igitt-*
 
+      - name: Create ZIP Archives
+        run: |
+          for dir in igitt-*; do
+            zip -r "${dir}.zip" "$dir"
+          done
+
       - name: debug-tree
         run: |
           tree
@@ -129,9 +135,8 @@ jobs:
         with:
           files: |
             igitt-*
-          tag_name: ${{ env.LATEST_TAG }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          name: "Automatic Pre-Release: ${{ env.LATEST_TAG }}-${{ env.SHORT_COMMIT }}"
+          name: "Automatic Pre-Release: ${{ github.ref_name }}"
           body: |
             This is an automatic pre-release build.
           draft: false
