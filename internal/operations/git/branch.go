@@ -87,3 +87,19 @@ func CheckoutBranch(branch string) {
 
 	logger.InfoLogger.Println("Checkout:", errOut, string(byteOut))
 }
+
+func CreateBranch(branch string) {
+	fmt.Println("Creating branch:", color.HiGreenString(branch))
+	progressIndicator := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+	progressIndicator.Start()
+	byteOut, errOut := exec.Command("git", "checkout", "-b", branch).CombinedOutput()
+	progressIndicator.Stop()
+
+	if errOut != nil {
+		logger.ErrorLogger.Println("Error creating branch:", errOut, string(byteOut))
+		utilities.PrintError(string(byteOut))
+		return
+	}
+
+	logger.InfoLogger.Println("Branch created:", errOut, string(byteOut))
+}
