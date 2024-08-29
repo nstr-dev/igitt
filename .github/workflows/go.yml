@@ -119,6 +119,12 @@ jobs:
         with:
           pattern: igitt-*
 
+      - name: Create ZIP Archives
+        run: |
+          for dir in igitt-*; do
+            zip -r "${dir}.zip" "$dir"
+          done
+
       - name: debug-tree
         run: |
           tree
