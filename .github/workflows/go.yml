@@ -107,6 +107,8 @@ jobs:
             out/igitt*
 
   pre-release:
+    permissions:
+      contents: write
     if: startsWith(github.ref, 'refs/tags/')
     needs: build
     runs-on: ubuntu-latest
