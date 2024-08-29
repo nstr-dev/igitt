@@ -4,7 +4,7 @@ on:
   push:
     # branches: ["main"]
     tags:
-      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+.*"
   pull_request:
     branches: ["main"]
 
@@ -119,10 +119,9 @@ jobs:
         with:
           pattern: igitt-*
 
-      - name: Get latest tag and short commit SHA
+      - name: debug-tree
         run: |
-          echo "LATEST_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
-          echo "SHORT_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          tree
 
       - name: Release on GitHub
         uses: softprops/action-gh-release@v2
