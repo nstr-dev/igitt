@@ -105,7 +105,7 @@ jobs:
         with:
           files: |
             igitt-*
-          tag_name: ${{ env.LATEST_TAG }}-${{ env.SHORT_COMMIT }}
+          tag_name: ${{ env.LATEST_TAG }}
           body: |
             Release ${{ env.LATEST_TAG }}
           draft: false
