@@ -83,7 +83,7 @@ jobs:
           fi
 
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4.3.6
+        uses: actions/upload-artifact@v4
         with:
           name: igitt-${{ matrix.goos }}-${{ matrix.goarch }}-${{ env.LATEST_TAG }}-${{ env.SHORT_COMMIT }}
           path: |
@@ -97,7 +97,7 @@ jobs:
       - name: Download Build Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: "igitt-*"
+          pattern: igitt-*
 
       - name: Release on GitHub
         uses: softprops/action-gh-release@v2
