@@ -61,6 +61,11 @@ jobs:
           echo "GOOS=${{ matrix.goos }}" >> $GITHUB_ENV
           echo "GOARCH=${{ matrix.goarch }}" >> $GITHUB_ENV
 
+      - name: Get latest tag and short commit SHA
+        run: |
+          echo "TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+          echo "SHORT_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
       - name: Build
         run: |
           if [[ "${{ matrix.goos }}" == "windows" ]]; then \
@@ -72,6 +77,6 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4.3.6
         with:
-          name: igitt-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: igitt-${{ matrix.goos }}-${{ matrix.goarch }}-${{ env.TAG }}-${{ env.SHORT_COMMIT }}
           path: |
             out/igitt*
