@@ -1,6 +1,6 @@
 module github.com/noahstreller/igitt
 
-go 1.23
+go 1.23.0
 
 require (
 	github.com/briandowns/spinner v1.23.1

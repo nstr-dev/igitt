@@ -20,7 +20,12 @@ func CreateAliasScripts() {
 	logger.InfoLogger.Printf("Creating alias for executable in %v", executablePath)
 
 	aliasScriptWindows := `@ECHO OFF
-"` + executable + `" %*`
+if exist `+ executable +` (
+	`+ executable +` %*
+) else (
+	igitt mkalias
+	igitt %*
+)`
 
 	aliasScriptUnix := `#!/bin/bash
 "` + executable + `" "$@"`

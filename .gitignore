@@ -25,8 +25,9 @@ go.work.sum
 .env
 
 # log file
-igitt.exe.log
+igitt.log
+/igitt.exe.log
 
-# scripts
+# linux script, keep windows script as it is required for the installer
 igt
-igt.cmd
+/igt.cmd
