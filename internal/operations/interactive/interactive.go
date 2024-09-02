@@ -172,7 +172,7 @@ func StartInteractive() {
 					Title("Branch selection").
 					Description(bold("\n  Select a branch\n")).
 					Options(getBranchOptions()...).
-					Value(&commandFlowResult.SelectedBranch)))
+					Value(&commandFlowResult.SelectedBranch))).WithTheme(theme)
 
 	formGroups["ns-choose-branch-action"] =
 		huh.NewForm(
@@ -181,7 +181,53 @@ func StartInteractive() {
 					Title("Branch action selection").
 					Description(fmt.Sprintf("\n  Select an action for the branch %s\n", commandFlowResult.SelectedBranch)).
 					Options(getBranchActionOptions()...).
-					Value(&commandFlowResult.BranchAction)))
+					Value(&commandFlowResult.BranchAction))).WithTheme(theme)
+
+	formGroups["ns-enter-repo-url"] =
+		huh.NewForm(
+			huh.NewGroup(
+				huh.NewInput().
+					Title("Link to Git repository").
+					Description("\n" + getLinkIcon(iconVariant) + "Enter the link to your repository here.\n").
+					Suggestions([]string{
+						"https://github.com/",
+						"https://gitlab.com/",
+						"https://bitbucket.org/",
+						"https://sourcehut.org/",
+						"https://codeberg.org/",
+						"https://gitea.io/",
+					}).
+					Validate(func(s string) error {
+						if s == "" {
+							return fmt.Errorf("if you're ready to clone, enter a repository URL")
+						}
+						return nil
+					}).
+					Value(&commandFlowResult.RepoUrlInput))).WithTheme(theme)
+
+	formGroups["ns-enter-commit-message"] =
+		huh.NewForm(
+			huh.NewGroup(
+				huh.NewInput().
+					Title("Commit message").
+					Description("\n" + getCommitIcon(iconVariant) + "Type a short description to the commit.\n").
+					Suggestions([]string{
+						"feat: ",
+						"fix: ",
+						"docs: ",
+						"style: ",
+						"refactor: ",
+						"perf: ",
+						"test: ",
+						"chore: ",
+					}).
+					Validate(func(s string) error {
+						if s == "" {
+							return fmt.Errorf("please enter a commit message")
+						}
+						return nil
+					}).
+					Value(&commandFlowResult.CommitMessage))).WithTheme(theme)
 
 	mainForm := huh.NewForm(
 		huh.NewGroup(
@@ -210,54 +256,6 @@ func StartInteractive() {
 				Options(commandOptions...).
 				Value(&commandFlowResult.SelectedCommand),
 		),
-
-		huh.NewGroup(
-			huh.NewInput().
-				Title("Link to Git repository").
-				Description("\n"+getLinkIcon(iconVariant)+"Enter the link to your repository here.\n").
-				Suggestions([]string{
-					"https://github.com/",
-					"https://gitlab.com/",
-					"https://bitbucket.org/",
-					"https://sourcehut.org/",
-					"https://codeberg.org/",
-					"https://gitea.io/",
-				}).
-				Validate(func(s string) error {
-					if s == "" {
-						return fmt.Errorf("if you're ready to clone, enter a repository URL")
-					}
-					return nil
-				}).
-				Value(&commandFlowResult.RepoUrlInput),
-		).WithHideFunc(func() bool {
-			return commandFlowResult.SelectedCommand.NextStep != "ns-enter-repo-url"
-		}),
-
-		huh.NewGroup(
-			huh.NewInput().
-				Title("Commit message").
-				Description("\n"+getCommitIcon(iconVariant)+"Type a short description to the commit.\n").
-				Suggestions([]string{
-					"feat: ",
-					"fix: ",
-					"docs: ",
-					"style: ",
-					"refactor: ",
-					"perf: ",
-					"test: ",
-					"chore: ",
-				}).
-				Validate(func(s string) error {
-					if s == "" {
-						return fmt.Errorf("please enter a commit message")
-					}
-					return nil
-				}).
-				Value(&commandFlowResult.CommitMessage),
-		).WithHideFunc(func() bool {
-			return commandFlowResult.SelectedCommand.NextStep != "ns-enter-commit-message"
-		}),
 	).WithTheme(theme).WithHeight(len(commands) + 9)
 
 	err := mainForm.Run()
@@ -265,19 +263,38 @@ func StartInteractive() {
 		logger.ErrorLogger.Fatal(err)
 	}
 
-	runNextStep(commandFlowResult, formGroups)
-	runResultingCommand(commandFlowResult)
+	nextStepErr := runNextStep(commandFlowResult, formGroups)
+	if nextStepErr != nil {
+		logger.ErrorLogger.Fatal(nextStepErr)
+	} else {
+		runResultingCommand(commandFlowResult)
+	}
 }
 
-func runNextStep(commandFlow CommandFlowResult, formGroups map[string]*huh.Form) {
+func runNextStep(commandFlow CommandFlowResult, formGroups map[string]*huh.Form) error {
 	if commandFlow.SelectedCommand.NextStep == "ns-choose-branch" {
-		formGroups["ns-choose-branch"].Run()
+		err := formGroups["ns-choose-branch"].Run()
+		if err != nil {
+			return err
+		}
+		commandFlow.SelectedCommand.NextStep = "ns-choose-branch-action"
+		err = runNextStep(commandFlow, formGroups)
+		return err
 	}
 
 	if commandFlow.SelectedCommand.NextStep == "ns-choose-branch-action" {
-		formGroups["ns-choose-branch-action"].Run()
+		return formGroups["ns-choose-branch-action"].Run()
 	}
 
+	if commandFlow.SelectedCommand.NextStep == "ns-enter-repo-url" {
+		return formGroups["ns-enter-repo-url"].Run()
+	}
+
+	if commandFlow.SelectedCommand.NextStep == "ns-enter-commit-message" {
+		return formGroups["ns-enter-commit-message"].Run()
+	}
+
+	return nil
 }
 
 func runResultingCommand(commandFlow CommandFlowResult) {
