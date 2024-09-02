@@ -139,6 +139,7 @@ func getBranchActionOptions() []huh.Option[string] {
 
 func StartInteractive() {
 	var commands []Command
+	formGroups := make(map[string]*huh.Form)
 
 	commandFlowResult := CommandFlowResult{
 		SelectedCommand: Command{Id: "none"},
@@ -164,7 +165,25 @@ func StartInteractive() {
 	theme.Focused.Base.Border(lipgloss.HiddenBorder())
 	theme.Form.Border(lipgloss.NormalBorder())
 
-	err := huh.NewForm(
+	formGroups["ns-choose-branch"] =
+		huh.NewForm(
+			huh.NewGroup(
+				huh.NewSelect[string]().
+					Title("Branch selection").
+					Description(bold("\n  Select a branch\n")).
+					Options(getBranchOptions()...).
+					Value(&commandFlowResult.SelectedBranch)))
+
+	formGroups["ns-choose-branch-action"] =
+		huh.NewForm(
+			huh.NewGroup(
+				huh.NewSelect[string]().
+					Title("Branch action selection").
+					Description(fmt.Sprintf("\n  Select an action for the branch %s\n", commandFlowResult.SelectedBranch)).
+					Options(getBranchActionOptions()...).
+					Value(&commandFlowResult.BranchAction)))
+
+	mainForm := huh.NewForm(
 		huh.NewGroup(
 			huh.NewSelect[Command]().
 				Title("Igitt").
@@ -239,36 +258,30 @@ func StartInteractive() {
 		).WithHideFunc(func() bool {
 			return commandFlowResult.SelectedCommand.NextStep != "ns-enter-commit-message"
 		}),
+	).WithTheme(theme).WithHeight(len(commands) + 9)
 
-		huh.NewGroup(
-			huh.NewSelect[string]().
-				Title("Branch selection").
-				Description(bold("\n  Select a branch\n")).
-				Options(getBranchOptions()...).
-				Value(&commandFlowResult.SelectedBranch),
-		).WithHideFunc(func() bool {
-			return commandFlowResult.SelectedCommand.NextStep != "ns-choose-branch"
-		}),
-
-		huh.NewGroup(
-			huh.NewSelect[string]().
-				Title("Branch action selection").
-				Description(fmt.Sprintf("\n  Select an action for the branch %s\n", commandFlowResult.SelectedBranch)).
-				Options(getBranchActionOptions()...).
-				Value(&commandFlowResult.BranchAction),
-		).WithHideFunc(func() bool {
-			return commandFlowResult.SelectedCommand.NextStep != "ns-choose-branch" || !(commandFlowResult.SelectedBranch != "")
-		}),
-	).WithTheme(theme).WithHeight(len(commands) + 9).Run()
-
+	err := mainForm.Run()
 	if err != nil {
 		logger.ErrorLogger.Fatal(err)
 	}
 
+	runNextStep(commandFlowResult, formGroups)
 	runResultingCommand(commandFlowResult)
 }
 
+func runNextStep(commandFlow CommandFlowResult, formGroups map[string]*huh.Form) {
+	if commandFlow.SelectedCommand.NextStep == "ns-choose-branch" {
+		formGroups["ns-choose-branch"].Run()
+	}
+
+	if commandFlow.SelectedCommand.NextStep == "ns-choose-branch-action" {
+		formGroups["ns-choose-branch-action"].Run()
+	}
+
+}
+
 func runResultingCommand(commandFlow CommandFlowResult) {
+
 	if commandFlow.SelectedCommand.Id == "op-clone" && commandFlow.RepoUrlInput != "" {
 		logger.InfoLogger.Println("clone command selected, sending to operations")
 		git.CloneRepository(commandFlow.RepoUrlInput)
