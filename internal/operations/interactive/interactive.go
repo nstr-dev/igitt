@@ -49,6 +49,7 @@ type CommandFlowResult struct {
 	CommitMessage   string
 	SelectedBranch  string
 	BranchAction    string
+	NewBranchName   string
 }
 
 const iconWidth = 3
@@ -117,10 +118,12 @@ func getBranchOptions() []huh.Option[string] {
 
 	for i, b := range branches {
 		if b == branchResult.CheckedOutBranch {
-			b = fmt.Sprintf("%s*", b)
+			b = fmt.Sprintf("%s *", b)
 		}
 		branchOptions[i] = huh.NewOption(b, b)
 	}
+
+	branchOptions = append(branchOptions, huh.NewOption("[ Create new branch ]", "[newBranch]"))
 
 	return branchOptions
 }
@@ -137,16 +140,19 @@ func getBranchActionOptions() []huh.Option[string] {
 	return branchActionOptions
 }
 
+var commandFlowResult = CommandFlowResult{
+	SelectedCommand: Command{Id: "none"},
+	RepoUrlInput:    "",
+	GitAddArguments: "",
+	CommitMessage:   "",
+	NewBranchName:   "",
+	SelectedBranch:  "",
+	BranchAction:    "",
+}
+
 func StartInteractive() {
 	var commands []Command
 	formGroups := make(map[string]*huh.Form)
-
-	commandFlowResult := CommandFlowResult{
-		SelectedCommand: Command{Id: "none"},
-		RepoUrlInput:    "",
-		GitAddArguments: "",
-		CommitMessage:   "",
-	}
 
 	_ = json.Unmarshal(commandJSON, &commands)
 	commandOptions := make([]huh.Option[Command], len(commands))
@@ -171,7 +177,7 @@ func StartInteractive() {
 				huh.NewSelect[string]().
 					Title("Branch selection").
 					Description(bold("\n  Select a branch\n")).
-					Options(getBranchOptions()...).
+					OptionsFunc(getBranchOptions, &commandFlowResult).
 					Value(&commandFlowResult.SelectedBranch))).WithTheme(theme)
 
 	formGroups["ns-choose-branch-action"] =
@@ -182,6 +188,39 @@ func StartInteractive() {
 					Description(fmt.Sprintf("\n  Select an action for the branch %s\n", commandFlowResult.SelectedBranch)).
 					Options(getBranchActionOptions()...).
 					Value(&commandFlowResult.BranchAction))).WithTheme(theme)
+
+	formGroups["ns-enter-new-branch-name"] =
+		huh.NewForm(
+			huh.NewGroup(
+				huh.NewInput().
+					Title("Branch name").
+					Description("\n" + "Enter the desired branch name here.\n").
+					Suggestions([]string{
+						"feature/",
+						"bugfix/",
+						"hotfix/",
+						"fix/",
+						"refactor/",
+						"chore/",
+						"docs/",
+					}).
+					Validate(func(s string) error {
+						if s == "" {
+							return fmt.Errorf("the branch name should not be empty")
+						}
+
+						if strings.ContainsAny(s, " ~^:?*[]\\") ||
+							strings.Contains(s, "\\") ||
+							strings.Contains(s, "//") ||
+							strings.Contains(s, "@{") ||
+							strings.Contains(s, "..") ||
+							s == "@" {
+							return fmt.Errorf("some special characters are not allowed in branch names")
+						}
+
+						return nil
+					}).
+					Value(&commandFlowResult.NewBranchName))).WithTheme(theme)
 
 	formGroups["ns-enter-repo-url"] =
 		huh.NewForm(
@@ -263,99 +302,127 @@ func StartInteractive() {
 		logger.ErrorLogger.Fatal(err)
 	}
 
-	nextStepErr := runNextStep(commandFlowResult, formGroups)
+	nextStepErr := runNextStep(formGroups)
 	if nextStepErr != nil {
 		logger.ErrorLogger.Fatal(nextStepErr)
 	} else {
-		runResultingCommand(commandFlowResult)
+		runResultingCommand()
 	}
 }
 
-func runNextStep(commandFlow CommandFlowResult, formGroups map[string]*huh.Form) error {
-	if commandFlow.SelectedCommand.NextStep == "ns-choose-branch" {
+func runNextStep(formGroups map[string]*huh.Form) error {
+	if commandFlowResult.SelectedCommand.NextStep == "ns-choose-branch" {
 		err := formGroups["ns-choose-branch"].Run()
 		if err != nil {
 			return err
 		}
-		commandFlow.SelectedCommand.NextStep = "ns-choose-branch-action"
-		err = runNextStep(commandFlow, formGroups)
+
+		fmt.Println("Selected branch:", commandFlowResult.SelectedBranch)
+
+		if commandFlowResult.SelectedBranch == "[newBranch]" {
+			fmt.Println("yes")
+			commandFlowResult.SelectedCommand.NextStep = "ns-enter-new-branch-name"
+			err = runNextStep(formGroups)
+			return err
+		}
+
+		fmt.Println("no")
+		commandFlowResult.SelectedCommand.NextStep = "ns-choose-branch-action"
+		err = runNextStep(formGroups)
 		return err
 	}
 
-	if commandFlow.SelectedCommand.NextStep == "ns-choose-branch-action" {
+	if commandFlowResult.SelectedCommand.NextStep == "ns-enter-new-branch-name" {
+		return formGroups["ns-enter-new-branch-name"].Run()
+	}
+
+	if commandFlowResult.SelectedCommand.NextStep == "ns-choose-branch-action" {
 		return formGroups["ns-choose-branch-action"].Run()
 	}
 
-	if commandFlow.SelectedCommand.NextStep == "ns-enter-repo-url" {
+	if commandFlowResult.SelectedCommand.NextStep == "ns-enter-repo-url" {
 		return formGroups["ns-enter-repo-url"].Run()
 	}
 
-	if commandFlow.SelectedCommand.NextStep == "ns-enter-commit-message" {
+	if commandFlowResult.SelectedCommand.NextStep == "ns-enter-commit-message" {
 		return formGroups["ns-enter-commit-message"].Run()
 	}
 
 	return nil
 }
 
-func runResultingCommand(commandFlow CommandFlowResult) {
+func runResultingCommand() {
 
-	if commandFlow.SelectedCommand.Id == "op-clone" && commandFlow.RepoUrlInput != "" {
+	if commandFlowResult.SelectedCommand.Id == "op-clone" && commandFlowResult.RepoUrlInput != "" {
 		logger.InfoLogger.Println("clone command selected, sending to operations")
-		git.CloneRepository(commandFlow.RepoUrlInput)
+		git.CloneRepository(commandFlowResult.RepoUrlInput)
 		return
 	}
 
-	if commandFlow.SelectedCommand.Id == "op-commit" && commandFlow.CommitMessage != "" {
+	if commandFlowResult.SelectedCommand.Id == "op-commit" && commandFlowResult.CommitMessage != "" {
 		logger.InfoLogger.Println("commit command selected, sending to operations")
-		git.CommitChanges(commandFlow.CommitMessage)
+		git.CommitChanges(commandFlowResult.CommitMessage)
 		return
 	}
 
-	if commandFlow.SelectedCommand.Id == "op-branches" && commandFlow.SelectedBranch != "" && commandFlow.BranchAction != "" {
-		isCheckedOutAlready := strings.Contains(commandFlow.SelectedBranch, "*")
-		checkedOutBranchWithoutStar := strings.TrimPrefix(commandFlow.SelectedBranch, "*")
+	if commandFlowResult.SelectedCommand.Id == "op-branches" &&
+		commandFlowResult.SelectedBranch != "" &&
+		commandFlowResult.NewBranchName != "" &&
+		commandFlowResult.SelectedCommand.NextStep == "ns-enter-new-branch-name" {
+
+		logger.InfoLogger.Printf("branch command selected, sending to operations, new branch name: %s\n", commandFlowResult.NewBranchName)
+		git.CreateBranch(commandFlowResult.NewBranchName)
+		return
+	}
+
+	if commandFlowResult.SelectedCommand.Id == "op-branches" &&
+		commandFlowResult.SelectedBranch != "" &&
+		commandFlowResult.BranchAction != "" {
+
+		isCheckedOutAlready := strings.Contains(commandFlowResult.SelectedBranch, "*")
+		checkedOutBranchWithoutStar := strings.TrimPrefix(commandFlowResult.SelectedBranch, "*")
 
 		logger.InfoLogger.Printf("branch command selected, sending to action block, isCheckedOutAlready: %v, checkedOutBranchWithoutStar: %s\n", isCheckedOutAlready, checkedOutBranchWithoutStar)
 
-		if commandFlow.BranchAction == "Check out" && !isCheckedOutAlready {
+		if commandFlowResult.BranchAction == "Check out" && !isCheckedOutAlready {
 			logger.InfoLogger.Println("checkout command selected, sending to operations")
-			git.CheckoutBranch(commandFlow.SelectedBranch)
+			git.CheckoutBranch(commandFlowResult.SelectedBranch)
 			return
 		}
-		if commandFlow.BranchAction == "Check out" && isCheckedOutAlready {
+		if commandFlowResult.BranchAction == "Check out" && isCheckedOutAlready {
 			logger.InfoLogger.Println("checkout command selected, not sending to operations, branch already checked out")
 			fmt.Println("Branch already checked out")
 			return
 		}
 	}
 
-	if commandFlow.SelectedCommand.Id == "op-init" {
+	if commandFlowResult.SelectedCommand.Id == "op-init" {
 		logger.InfoLogger.Println("init command selected, sending to operations")
 		git.InitRepository()
 		return
 	}
 
-	if commandFlow.SelectedCommand.Id == "op-status" {
+	if commandFlowResult.SelectedCommand.Id == "op-status" {
 		logger.InfoLogger.Println("status command selected, sending to operations")
 		git.Status()
 		return
 	}
 
-	if commandFlow.SelectedCommand.Id == "op-pull" {
+	if commandFlowResult.SelectedCommand.Id == "op-pull" {
 		logger.InfoLogger.Println("pull command selected, sending to operations")
 		git.PullRemote()
 		return
 	}
 
-	if commandFlow.SelectedCommand.Id == "op-push" {
+	if commandFlowResult.SelectedCommand.Id == "op-push" {
 		logger.InfoLogger.Println("push command selected, sending to operations")
 		git.PushRemote()
 		return
 	}
 
-	if commandFlow.SelectedCommand.Id == "op-add" && commandFlow.GitAddArguments != "" {
+	if commandFlowResult.SelectedCommand.Id == "op-add" && commandFlowResult.GitAddArguments != "" {
 		logger.InfoLogger.Println("add command selected, sending to operations")
-		git.AddChanges(commandFlow.GitAddArguments)
+		git.AddChanges(commandFlowResult.GitAddArguments)
 		return
 	}
 }
