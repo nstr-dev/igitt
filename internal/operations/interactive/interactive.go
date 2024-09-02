@@ -317,16 +317,12 @@ func runNextStep(formGroups map[string]*huh.Form) error {
 			return err
 		}
 
-		fmt.Println("Selected branch:", commandFlowResult.SelectedBranch)
-
 		if commandFlowResult.SelectedBranch == "[newBranch]" {
-			fmt.Println("yes")
 			commandFlowResult.SelectedCommand.NextStep = "ns-enter-new-branch-name"
 			err = runNextStep(formGroups)
 			return err
 		}
 
-		fmt.Println("no")
 		commandFlowResult.SelectedCommand.NextStep = "ns-choose-branch-action"
 		err = runNextStep(formGroups)
 		return err
