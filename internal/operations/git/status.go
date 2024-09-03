@@ -81,14 +81,12 @@ func Status() {
 	}
 
 	if len(modifications) == 0 {
-		fmt.Println("\n", color.HiGreenString("✓"), "Up to date.")
+		fmt.Println(color.HiGreenString("✓"), "Up to date.")
 		return
 	}
 
-	bold := color.New(color.Bold).SprintFunc()
-	fmt.Println(color.BlackString("==================="))
-	fmt.Println(bold("Files with changes:"))
-	fmt.Println(color.BlackString("==================="))
+	fmt.Printf("\nFiles with changes:\n")
+	fmt.Printf("===================\n\n")
 
 	statusMap := make(map[string]ModifiedStatusInfo)
 	for _, status := range FileStatuses {
