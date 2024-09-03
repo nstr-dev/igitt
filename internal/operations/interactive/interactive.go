@@ -43,13 +43,14 @@ type Command struct {
 }
 
 type CommandFlowResult struct {
-	SelectedCommand Command
-	RepoUrlInput    string
-	GitAddArguments string
-	CommitMessage   string
-	SelectedBranch  string
-	BranchAction    string
-	NewBranchName   string
+	SelectedCommand     Command
+	RepoUrlInput        string
+	GitAddArguments     string
+	CommitMessage       string
+	SelectedBranch      string
+	BranchAction        string
+	NewBranchName       string
+	DeleteBranchConfirm bool
 }
 
 const iconWidth = 3
@@ -129,7 +130,7 @@ func getBranchOptions() []huh.Option[string] {
 }
 
 func getBranchActionOptions() []huh.Option[string] {
-	branchActions := []string{"Check out", "Delete (wip)", "Rename (wip)"}
+	branchActions := []string{"Check out", "Delete"}
 
 	branchActionOptions := make([]huh.Option[string], len(branchActions))
 
@@ -141,13 +142,14 @@ func getBranchActionOptions() []huh.Option[string] {
 }
 
 var commandFlowResult = CommandFlowResult{
-	SelectedCommand: Command{Id: "none"},
-	RepoUrlInput:    "",
-	GitAddArguments: "",
-	CommitMessage:   "",
-	NewBranchName:   "",
-	SelectedBranch:  "",
-	BranchAction:    "",
+	SelectedCommand:     Command{Id: "none"},
+	RepoUrlInput:        "",
+	GitAddArguments:     "",
+	CommitMessage:       "",
+	NewBranchName:       "",
+	SelectedBranch:      "",
+	BranchAction:        "",
+	DeleteBranchConfirm: false,
 }
 
 func StartInteractive() {
@@ -187,7 +189,17 @@ func StartInteractive() {
 					Title("Branch action selection").
 					Description(fmt.Sprintf("\n  Select an action for the branch %s\n", commandFlowResult.SelectedBranch)).
 					Options(getBranchActionOptions()...).
-					Value(&commandFlowResult.BranchAction))).WithTheme(theme)
+					Value(&commandFlowResult.BranchAction)),
+			huh.NewGroup(
+				huh.NewConfirm().
+					Title("Delete branch").
+					Description(fmt.Sprintf("\n  Are you sure you want to delete the branch %s?\n", commandFlowResult.SelectedBranch)).
+					Value(&commandFlowResult.DeleteBranchConfirm),
+			).WithHideFunc(func() bool {
+				return commandFlowResult.DeleteBranchConfirm ||
+					commandFlowResult.SelectedCommand.NextStep != "ns-choose-branch-action" ||
+					commandFlowResult.BranchAction != "Delete"
+			})).WithTheme(theme)
 
 	formGroups["ns-enter-new-branch-name"] =
 		huh.NewForm(
@@ -388,6 +400,18 @@ func runResultingCommand() {
 		if commandFlowResult.BranchAction == "Check out" && isCheckedOutAlready {
 			logger.InfoLogger.Println("checkout command selected, not sending to operations, branch already checked out")
 			fmt.Println("Branch already checked out")
+			return
+		}
+
+		if commandFlowResult.BranchAction == "Delete" && !isCheckedOutAlready {
+			logger.InfoLogger.Println("delete command selected, sending to operations")
+			git.DeleteBranch(checkedOutBranchWithoutStar)
+			return
+		}
+
+		if commandFlowResult.BranchAction == "Delete" && isCheckedOutAlready {
+			logger.InfoLogger.Println("delete command selected, not sending to operations, branch already checked out")
+			fmt.Println("Cannot delete the branch you are currently on")
 			return
 		}
 	}
