@@ -1,10 +1,9 @@
 package initialize
 
 import (
-	"fmt"
 	"os"
+	"strings"
 
-	"github.com/fatih/color"
 	"github.com/noahstreller/igitt/internal/operations"
 	"github.com/noahstreller/igitt/internal/operations/git"
 	"github.com/noahstreller/igitt/internal/operations/interactive"
@@ -28,7 +27,7 @@ func InitializeIgitt() {
 		Aliases: []string{"cln"},
 		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			git.CloneRepository(args[0])
+			git.CloneRepository(strings.Join(args, " "))
 		},
 	}
 
@@ -62,7 +61,7 @@ func InitializeIgitt() {
 		Args:    cobra.MinimumNArgs(1),
 		Aliases: []string{"cmt"},
 		Run: func(cmd *cobra.Command, args []string) {
-			git.CommitChanges(args[0])
+			git.CommitChanges(strings.Join(args, " "))
 		},
 	}
 
@@ -72,7 +71,7 @@ func InitializeIgitt() {
 		Aliases: []string{"a", "+"},
 		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			git.AddChanges(args[0])
+			git.AddChanges(strings.Join(args, " "))
 		},
 	}
 
@@ -91,10 +90,22 @@ func InitializeIgitt() {
 		Args:    cobra.MinimumNArgs(1),
 		Aliases: []string{"cout"},
 		Run: func(cmd *cobra.Command, args []string) {
-			git.CheckoutBranch(args[0])
+			git.CheckoutBranch(strings.Join(args, " "))
 		},
 	}
 
+	var branchCmd = &cobra.Command{
+		Use:     "branch",
+		Short:   "(br) Manage branches",
+		Aliases: []string{"br"},
+		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) == 0 {
+				git.DoCustomBranchAction("")
+				return
+			}
+			git.DoCustomBranchAction(strings.Join(args, " "))
+		},
+	}
 	var interactiveCmd = &cobra.Command{
 		Use:     "interactive",
 		Short:   "(i) Enter interactive mode",
@@ -115,8 +126,8 @@ func InitializeIgitt() {
 
 	cobra.OnInitialize(func() {
 		if len(os.Args) == 1 {
-			fmt.Println(color.RedString("No arguments provided."))
-			// interactive.StartInteractive()
+			// fmt.Println(color.RedString("No arguments provided, entering interactive mode."))
+			interactive.StartInteractive()
 		}
 	})
 
@@ -131,6 +142,7 @@ func InitializeIgitt() {
 		checkoutCmd,
 		commitCmd,
 		createAliasScripts,
+		branchCmd,
 	)
 	err := rootCmd.Execute()
 	if err != nil {

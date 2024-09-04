@@ -72,6 +72,41 @@ func trimBranchPrefixes(branches []string) []string {
 	return trimmedBranches
 }
 
+func DoCustomBranchAction(arguments string) {
+
+	if arguments == "" {
+		progressIndicator := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+		progressIndicator.Start()
+		byteOut, errOut := exec.Command("git", "branch").CombinedOutput()
+		progressIndicator.Stop()
+
+		if errOut != nil {
+			logger.ErrorLogger.Println("Error running branch command:", errOut, string(byteOut))
+			utilities.PrintError(string(byteOut))
+			return
+		}
+
+		fmt.Printf("%s", string(byteOut))
+
+		logger.InfoLogger.Println("Branch command issued:", errOut, string(byteOut))
+		return
+	}
+
+	fmt.Println("Custom branch action:", color.HiGreenString(arguments))
+	progressIndicator := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+	progressIndicator.Start()
+	byteOut, errOut := exec.Command("git", "branch", arguments).CombinedOutput()
+	progressIndicator.Stop()
+
+	if errOut != nil {
+		logger.ErrorLogger.Println("Error running branch command:", errOut, string(byteOut))
+		utilities.PrintError(string(byteOut))
+		return
+	}
+
+	logger.InfoLogger.Println("Branch command issued:", errOut, string(byteOut))
+}
+
 func CheckoutBranch(branch string) {
 	fmt.Println("Checking out branch:", color.HiGreenString(branch))
 	progressIndicator := spinner.New(spinner.CharSets[11], 100*time.Millisecond)

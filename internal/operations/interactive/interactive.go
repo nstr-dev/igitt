@@ -153,6 +153,9 @@ var commandFlowResult = CommandFlowResult{
 }
 
 func StartInteractive() {
+
+	interactiveTitle := color.New(color.Bold, color.FgGreen).PrintfFunc()
+	interactiveTitle("⌜ Igitt Interactive ⌟\n")
 	var commands []Command
 	formGroups := make(map[string]*huh.Form)
 
@@ -179,7 +182,7 @@ func StartInteractive() {
 				huh.NewSelect[string]().
 					Title("Branch selection").
 					Description(bold("\n  Select a branch\n")).
-					OptionsFunc(getBranchOptions, &commandFlowResult).
+					OptionsFunc(getBranchOptions, &commandFlowResult.SelectedCommand).
 					Value(&commandFlowResult.SelectedBranch))).WithTheme(theme)
 
 	formGroups["ns-choose-branch-action"] =
@@ -311,6 +314,7 @@ func StartInteractive() {
 
 	err := mainForm.Run()
 	if err != nil {
+		fmt.Println(color.HiRedString("⌞ Bye ⌝"))
 		logger.ErrorLogger.Fatal(err)
 	}
 
