@@ -52,8 +52,21 @@ func HasConfigFile() (bool, string) {
 	}
 
 	_, err = os.Stat(configPath)
+	fileExists := !os.IsNotExist(err)
+	isFileEmpty := true
 
-	return !os.IsNotExist(err), configPath
+	if fileExists {
+		file, err := os.ReadFile(configPath)
+		if err != nil {
+			logger.ErrorLogger.Panic(err)
+		}
+		fileContents := string(file)
+		isFileEmpty = len(fileContents) == 0
+	}
+
+	result := fileExists && !isFileEmpty
+
+	return result, configPath
 }
 
 func GetConfig() IgittConfig {
@@ -95,7 +108,7 @@ func GetDefaultConfig() string {
 	configContent := `# This is the configuration for Igitt.
 # Please adjust the values as needed.
 
-# Choices: "emoji", "unicode", "nerdfont"
+# Choices: "emoji", "unicode", "nerdfont", "ascii" - Default: "unicode"
 iconType: "unicode"
 `
 

@@ -56,6 +56,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Source: "{#MyAppExeName}"; DestDir: "{app}";
 Source: ".innosetup\igitt.exe.log"; DestDir: "{app}";
 Source: ".innosetup\igt.cmd"; DestDir: "{app}";
+Source: ".innosetup\igittconfig.yaml"; DestDir: "{app}";
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

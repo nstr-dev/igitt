@@ -7,6 +7,7 @@
     "icon": "?",
     "icon_emoji": "👀",
     "icon_nerdfont": "",
+    "icon_ascii": "?",
     "nextStep": "none",
     "nextStepTitle": "None"
   },
@@ -18,6 +19,7 @@
     "icon": "✎",
     "icon_emoji": "📝",
     "icon_nerdfont": "",
+    "icon_ascii": "#",
     "nextStep": "ns-enter-commit-message",
     "nextStepTitle": "Enter commit message"
   },
@@ -29,6 +31,7 @@
     "icon": "+",
     "icon_emoji": "➕",
     "icon_nerdfont": "",
+    "icon_ascii": "+",
     "nextStep": "none",
     "nextStepTitle": "None"
   },
@@ -40,6 +43,7 @@
     "icon": "↓",
     "icon_emoji": "🔽",
     "icon_nerdfont": "↓",
+    "icon_ascii": "<",
     "nextStep": "none",
     "nextStepTitle": "None"
   },
@@ -51,6 +55,7 @@
     "icon": "↑",
     "icon_emoji": "🔼",
     "icon_nerdfont": "↑",
+    "icon_ascii": ">",
     "nextStep": "none",
     "nextStepTitle": "None"
   },
@@ -62,6 +67,7 @@
     "icon": "⎇",
     "icon_emoji": "🌿",
     "icon_nerdfont": "",
+    "icon_ascii": "B",
     "nextStep": "ns-choose-branch",
     "nextStepTitle": "Choose a branch"
   },
@@ -73,6 +79,7 @@
     "icon": "⎘",
     "icon_emoji": "📂",
     "icon_nerdfont": "",
+    "icon_ascii": "C",
     "nextStep": "ns-enter-repo-url",
     "nextStepTitle": "Enter remote repository URL"
   },
@@ -84,6 +91,7 @@
     "icon": "✧",
     "icon_emoji": "✨",
     "icon_nerdfont": "",
+    "icon_ascii": "*",
     "nextStep": "none",
     "nextStepTitle": "None"
   },
@@ -95,6 +103,7 @@
     "icon": "×",
     "icon_emoji": "❌",
     "icon_nerdfont": "×",
+    "icon_ascii": "x",
     "nextStep": "none",
     "nextStepTitle": "None"
   }
