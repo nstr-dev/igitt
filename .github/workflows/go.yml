@@ -69,8 +69,10 @@ jobs:
 
     strategy:
       matrix:
-        goos: [linux, windows, darwin]
-        goarch: [amd64, arm64]
+        goos: [linux, windows]
+        # goos: [linux, windows, darwin]
+        goarch: [amd64]
+        # goarch: [amd64, arm64]
 
     steps:
       - uses: actions/checkout@v4
@@ -91,17 +93,10 @@ jobs:
       - name: Build
         run: |
           if [[ "${{ matrix.goos }}" == "windows" ]]; then \
-            go build -v -o ./igitt.exe ./cmd/igitt; \
+            go build -v -o out/igitt.exe ./cmd/igitt; \
           else \
             go build -v -o out/igitt ./cmd/igitt; \
           fi
-
-      - name: Compile .ISS to .EXE Installer
-        if: matrix.goos == 'windows'
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
-        with:
-          path: ./igitt-setup.iss
-          options: /Oout/igitt-setup.exe
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
@@ -109,6 +104,30 @@ jobs:
           name: igitt-${{ matrix.goos }}-${{ matrix.goarch }}-${{ env.LATEST_TAG }}
           path: |
             out/igitt*
+
+  build-windows-setup:
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: igitt-windows-amd64-*
+
+      - name: Copy Build Artifacts
+        run: |
+          cp igitt-windows-amd64-*/* .
+
+      - name: Compile .ISS to .EXE Installer
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
+        with:
+          path: ./igitt-setup.iss
+          options: /Oout/igitt-setup.exe
 
   pre-release:
     permissions:
