@@ -129,7 +129,7 @@ jobs:
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
         with:
           path: ./igitt-setup.iss
-          options: /Oout/igitt-setup.exe
+          options: /Oout
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
