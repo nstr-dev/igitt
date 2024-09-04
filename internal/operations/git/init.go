@@ -16,7 +16,7 @@ func InitRepository() {
 	if err != nil {
 		logger.ErrorLogger.Println(err)
 	}
-	fmt.Println("Initializing repository in" + mydir)
+	fmt.Println("Initializing repository in " + mydir)
 
 	progressIndicator := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
 	progressIndicator.Start()

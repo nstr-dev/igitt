@@ -72,6 +72,41 @@ func trimBranchPrefixes(branches []string) []string {
 	return trimmedBranches
 }
 
+func DoCustomBranchAction(arguments string) {
+
+	if arguments == "" {
+		progressIndicator := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+		progressIndicator.Start()
+		byteOut, errOut := exec.Command("git", "branch").CombinedOutput()
+		progressIndicator.Stop()
+
+		if errOut != nil {
+			logger.ErrorLogger.Println("Error running branch command:", errOut, string(byteOut))
+			utilities.PrintError(string(byteOut))
+			return
+		}
+
+		fmt.Printf("%s", string(byteOut))
+
+		logger.InfoLogger.Println("Branch command issued:", errOut, string(byteOut))
+		return
+	}
+
+	fmt.Println("Custom branch action:", color.HiGreenString(arguments))
+	progressIndicator := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+	progressIndicator.Start()
+	byteOut, errOut := exec.Command("git", "branch", arguments).CombinedOutput()
+	progressIndicator.Stop()
+
+	if errOut != nil {
+		logger.ErrorLogger.Println("Error running branch command:", errOut, string(byteOut))
+		utilities.PrintError(string(byteOut))
+		return
+	}
+
+	logger.InfoLogger.Println("Branch command issued:", errOut, string(byteOut))
+}
+
 func CheckoutBranch(branch string) {
 	fmt.Println("Checking out branch:", color.HiGreenString(branch))
 	progressIndicator := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
@@ -86,4 +121,52 @@ func CheckoutBranch(branch string) {
 	}
 
 	logger.InfoLogger.Println("Checkout:", errOut, string(byteOut))
+}
+
+func CreateBranch(branch string) {
+	fmt.Println("Creating branch:", color.HiGreenString(branch))
+	progressIndicator := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+	progressIndicator.Start()
+	byteOut, errOut := exec.Command("git", "checkout", "-b", branch).CombinedOutput()
+	progressIndicator.Stop()
+
+	if errOut != nil {
+		logger.ErrorLogger.Println("Error creating branch:", errOut, string(byteOut))
+		utilities.PrintError(string(byteOut))
+		return
+	}
+
+	logger.InfoLogger.Println("Branch created:", errOut, string(byteOut))
+}
+
+func DeleteBranch(branch string) {
+	fmt.Println("Deleting branch:", color.HiRedString(branch))
+	progressIndicator := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+	progressIndicator.Start()
+	byteOut, errOut := exec.Command("git", "branch", "-D", branch).CombinedOutput()
+	progressIndicator.Stop()
+
+	if errOut != nil {
+		logger.ErrorLogger.Println("Error deleting branch:", errOut, string(byteOut))
+		utilities.PrintError(string(byteOut))
+		return
+	}
+
+	logger.InfoLogger.Println("Branch deleted:", errOut, string(byteOut))
+}
+
+func RenameBranch(oldBranch string, newBranch string) {
+	fmt.Println("Renaming branch:", color.HiGreenString(oldBranch), "to", color.HiGreenString(newBranch))
+	progressIndicator := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+	progressIndicator.Start()
+	byteOut, errOut := exec.Command("git", "branch", "-m", oldBranch, newBranch).CombinedOutput()
+	progressIndicator.Stop()
+
+	if errOut != nil {
+		logger.ErrorLogger.Println("Error renaming branch:", errOut, string(byteOut))
+		utilities.PrintError(string(byteOut))
+		return
+	}
+
+	logger.InfoLogger.Println("Branch renamed:", errOut, string(byteOut))
 }

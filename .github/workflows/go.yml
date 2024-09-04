@@ -59,6 +59,8 @@ jobs:
           go build -o /dev/null ./cmd/igitt;
 
   build:
+    env:
+      LATEST_TAG: ${{ github.ref_name }}
     needs: [lint, test]
     if: startsWith(github.ref, 'refs/tags/')
 
@@ -85,11 +87,6 @@ jobs:
         run: |
           echo "GOOS=${{ matrix.goos }}" >> $GITHUB_ENV
           echo "GOARCH=${{ matrix.goarch }}" >> $GITHUB_ENV
-
-      - name: Get latest tag and short commit SHA
-        run: |
-          echo "LATEST_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
-          echo "SHORT_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Build
         run: |
@@ -139,5 +136,7 @@ jobs:
           name: "Automatic Pre-Release: ${{ github.ref_name }}"
           body: |
             This is an automatic pre-release build.
-          draft: false
+
+          # if tag contains debug, it should be a draft release
+          draft: ${{ contains(github.ref, 'debug') }}
           prerelease: true
