@@ -9,6 +9,7 @@ require (
 	github.com/fatih/color v1.17.0
 	github.com/rivo/uniseg v0.4.7
 	github.com/spf13/cobra v1.8.1
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -37,5 +38,4 @@ require (
 	golang.org/x/sys v0.24.0 // indirect
 	golang.org/x/term v0.23.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
