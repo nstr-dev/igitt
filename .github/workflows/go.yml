@@ -91,10 +91,17 @@ jobs:
       - name: Build
         run: |
           if [[ "${{ matrix.goos }}" == "windows" ]]; then \
-            go build -v -o out/igitt.exe ./cmd/igitt; \
+            go build -v -o ./igitt.exe ./cmd/igitt; \
           else \
             go build -v -o out/igitt ./cmd/igitt; \
           fi
+
+      - name: Compile .ISS to .EXE Installer
+        if: matrix.goos == 'windows'
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
+        with:
+          path: ./igitt-setup.iss
+          options: /Oout/igitt-setup.exe
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
