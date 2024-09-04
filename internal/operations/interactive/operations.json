@@ -4,7 +4,7 @@
     "name": "Status",
     "shortcut": "s",
     "description": "Show changed files in the working directory",
-    "icon": "⚆⚆",
+    "icon": "?",
     "icon_emoji": "👀",
     "icon_nerdfont": "",
     "nextStep": "none",

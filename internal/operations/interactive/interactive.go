@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/fatih/color"
 	"github.com/noahstreller/igitt/internal/operations/git"
+	"github.com/noahstreller/igitt/internal/utilities/config"
 	"github.com/noahstreller/igitt/internal/utilities/logger"
 	"github.com/rivo/uniseg"
 
@@ -27,7 +28,7 @@ const (
 type IconType int
 
 func (d IconType) String() string {
-	return [...]string{"Unicode", "Emoji", "NerdFont"}[d]
+	return [...]string{"unicode", "emoji", "nerdfont"}[d]
 }
 
 type Command struct {
@@ -55,18 +56,30 @@ type CommandFlowResult struct {
 
 const iconWidth = 3
 const shortcutsEnabled = false
-const iconVariant = NerdFont
 
-func bold(s string) string {
-	return color.New(color.Bold).Sprint(s)
+var iconVariant = getIconVariantFromConfig()
+
+func getIconVariantFromConfig() IconType {
+	config := config.GetConfig()
+	userIconType := strings.ToLower(config.IconType)
+
+	if userIconType == "emoji" {
+		return Emoji
+	}
+
+	if userIconType == "nerdfont" {
+		return NerdFont
+	}
+
+	return Unicode
 }
 
 func getTitle(command Command) string {
 	if iconVariant == Emoji {
-		return command.IconEmoji + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconEmoji)) + bold(command.Name)
+		return command.IconEmoji + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconEmoji)) + command.Name
 	}
 	if iconVariant == NerdFont {
-		return command.IconNerdFont + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconNerdFont)) + bold(command.Name)
+		return command.IconNerdFont + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconNerdFont)) + command.Name
 	}
 	return command.Icon + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.Icon)) + command.Name
 }
@@ -181,7 +194,7 @@ func StartInteractive() {
 			huh.NewGroup(
 				huh.NewSelect[string]().
 					Title("Branch selection").
-					Description(bold("\n  Select a branch\n")).
+					Description("\n  Select a branch\n").
 					OptionsFunc(getBranchOptions, &commandFlowResult.SelectedCommand).
 					Value(&commandFlowResult.SelectedBranch))).WithTheme(theme)
 
@@ -295,7 +308,7 @@ func StartInteractive() {
 							getTitle(commandFlowResult.SelectedCommand),
 							commandFlowResult.SelectedCommand.Description,
 							getNextStepIcon(iconVariant),
-							bold("Next step: "+commandFlowResult.SelectedCommand.NextStepTitle),
+							"Next step: "+commandFlowResult.SelectedCommand.NextStepTitle,
 						)
 					}
 
@@ -304,7 +317,7 @@ func StartInteractive() {
 						getTitle(commandFlowResult.SelectedCommand),
 						commandFlowResult.SelectedCommand.Description,
 						getNoNextStepIcon(iconVariant),
-						bold("No"),
+						"No",
 					)
 				}, &commandFlowResult.SelectedCommand).
 				Options(commandOptions...).
