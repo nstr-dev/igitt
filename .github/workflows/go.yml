@@ -108,6 +108,8 @@ jobs:
   build-windows-setup:
     needs: build
     runs-on: windows-latest
+    env:
+      LATEST_TAG: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -129,11 +131,18 @@ jobs:
           path: ./igitt-setup.iss
           options: /Oout/igitt-setup.exe
 
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: igitt-setup-windows-amd64-${{ env.LATEST_TAG }}
+          path: |
+            out/igitt*
+
   pre-release:
     permissions:
       contents: write
     if: startsWith(github.ref, 'refs/tags/')
-    needs: build
+    needs: build-windows-setup
     runs-on: ubuntu-latest
 
     steps:
