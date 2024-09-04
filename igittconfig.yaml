@@ -1,5 +1,0 @@
-# This is the default configuration for Igitt.
-# Please adjust the values as needed.
-
-# Choices: "emoji", "unicode", "nerdfont" - default: unicode
-iconType: "nerdfont"

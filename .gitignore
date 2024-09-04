@@ -31,3 +31,5 @@ igitt.log
 # linux script, keep windows script as it is required for the installer
 igt
 /igt.cmd
+
+igittconfig.yaml
