@@ -7,6 +7,7 @@ import (
 	"github.com/noahstreller/igitt/internal/operations"
 	"github.com/noahstreller/igitt/internal/operations/git"
 	"github.com/noahstreller/igitt/internal/operations/interactive"
+	"github.com/noahstreller/igitt/internal/utilities/config"
 	"github.com/noahstreller/igitt/internal/utilities/logger"
 	"github.com/spf13/cobra"
 )
@@ -128,18 +129,17 @@ func InitializeIgitt() {
 		Use:   "config",
 		Short: "Print the path of the igitt configuration file",
 		Run: func(cmd *cobra.Command, args []string) {
-			// config.GetConfigPath(true)
-
+			config.GetConfigPath(true)
 		},
 	}
 
 	cobra.OnInitialize(func() {
-		// err := config.InitialConfig()
+		err := config.InitialConfig()
 
-		// if err != nil {
-		// 	logger.ErrorLogger.Fatal(err)
-		// 	return
-		// }
+		if err != nil {
+			logger.ErrorLogger.Fatal(err)
+			return
+		}
 
 		if len(os.Args) == 1 {
 			interactive.StartInteractive()
