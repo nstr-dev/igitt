@@ -59,6 +59,8 @@ const shortcutsEnabled = false
 
 var iconVariant = getIconVariantFromConfig()
 
+// var iconVariant = Unicode
+
 func getIconVariantFromConfig() IconType {
 	config := config.GetConfig()
 	userIconType := strings.ToLower(config.IconType)
