@@ -168,8 +168,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: "Automatic Pre-Release: ${{ github.ref_name }}"
           body: |
-            This is an automatic pre-release build.
-
+            This is an automatic pre-release build. See the generated release notes below
+          generate_release_notes: true
           # if tag contains debug, it should be a draft release
           draft: ${{ contains(github.ref, 'debug') }}
           prerelease: true
