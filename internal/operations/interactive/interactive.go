@@ -23,12 +23,13 @@ const (
 	Unicode IconType = iota
 	Emoji
 	NerdFont
+	Ascii
 )
 
 type IconType int
 
 func (d IconType) String() string {
-	return [...]string{"unicode", "emoji", "nerdfont"}[d]
+	return [...]string{"unicode", "emoji", "nerdfont", "ascii"}[d]
 }
 
 type Command struct {
@@ -36,6 +37,7 @@ type Command struct {
 	Icon          string `json:"icon"`
 	IconEmoji     string `json:"icon_emoji"`
 	IconNerdFont  string `json:"icon_nerdfont"`
+	IconAscii     string `json:"icon_ascii"`
 	Name          string `json:"name"`
 	Shortcut      string `json:"shortcut"`
 	Description   string `json:"description"`
@@ -59,6 +61,8 @@ const shortcutsEnabled = false
 
 var iconVariant = getIconVariantFromConfig()
 
+// var iconVariant = Unicode
+
 func getIconVariantFromConfig() IconType {
 	config := config.GetConfig()
 	userIconType := strings.ToLower(config.IconType)
@@ -71,6 +75,10 @@ func getIconVariantFromConfig() IconType {
 		return NerdFont
 	}
 
+	if userIconType == "ascii" {
+		return Ascii
+	}
+
 	return Unicode
 }
 
@@ -80,6 +88,9 @@ func getTitle(command Command) string {
 	}
 	if iconVariant == NerdFont {
 		return command.IconNerdFont + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconNerdFont)) + command.Name
+	}
+	if iconVariant == Ascii {
+		return command.IconAscii + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.Icon)) + command.Name
 	}
 	return command.Icon + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.Icon)) + command.Name
 }
@@ -91,6 +102,9 @@ func getNextStepIcon(variant IconType) string {
 	if variant == NerdFont {
 		return ""
 	}
+	if variant == Ascii {
+		return ">"
+	}
 	return "↪"
 }
 
@@ -100,6 +114,9 @@ func getNoNextStepIcon(variant IconType) string {
 	}
 	if variant == NerdFont {
 		return ""
+	}
+	if variant == Ascii {
+		return "#"
 	}
 	return "◎"
 }
@@ -120,6 +137,10 @@ func getCommitIcon(variant IconType) string {
 	}
 	if variant == NerdFont {
 		return "  "
+	}
+	if variant == Ascii {
+		return ""
+
 	}
 	return "✎  "
 }
@@ -168,7 +189,18 @@ var commandFlowResult = CommandFlowResult{
 func StartInteractive() {
 
 	interactiveTitle := color.New(color.Bold, color.FgGreen).PrintfFunc()
-	interactiveTitle("⌜ Igitt Interactive ⌟\n")
+	var interactiveTitleText string
+	var interactiveByeText string
+
+	if iconVariant == Ascii {
+		interactiveTitleText = "[ Igitt Interactive ]\n"
+		interactiveByeText = "[ Bye ]\n"
+	} else {
+		interactiveTitleText = "⌜ Igitt Interactive ⌟\n"
+		interactiveByeText = "⌞ Bye ⌝\n"
+	}
+
+	interactiveTitle(interactiveTitleText)
 	var commands []Command
 	formGroups := make(map[string]*huh.Form)
 
@@ -327,7 +359,7 @@ func StartInteractive() {
 
 	err := mainForm.Run()
 	if err != nil {
-		fmt.Println(color.HiRedString("⌞ Bye ⌝"))
+		fmt.Println(color.HiRedString(interactiveByeText))
 		logger.ErrorLogger.Fatal(err)
 	}
 

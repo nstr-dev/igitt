@@ -17,8 +17,8 @@ type IgittConfig struct {
 }
 
 func InitialConfig() error {
-
 	configExists, configPath := HasConfigFile()
+
 	if configExists {
 		return nil
 	}
@@ -26,14 +26,14 @@ func InitialConfig() error {
 	file, err := os.OpenFile(configPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 
 	if err != nil {
-		logger.ErrorLogger.Fatal(err)
+		logger.ErrorLogger.Panic(err)
 		return err
 	}
 
 	_, err = file.Write([]byte(GetDefaultConfig()))
 
 	if err != nil {
-		logger.ErrorLogger.Fatal(err)
+		logger.ErrorLogger.Panic(err)
 		return err
 	}
 
@@ -48,28 +48,43 @@ func HasConfigFile() (bool, string) {
 	configPath := filepath.Join(executableDir, configFileName)
 
 	if err != nil {
-		logger.ErrorLogger.Fatal(err)
+		logger.ErrorLogger.Panic(err)
 	}
 
 	_, err = os.Stat(configPath)
+	fileExists := !os.IsNotExist(err)
+	isFileEmpty := true
 
-	return !os.IsNotExist(err), configPath
+	if fileExists {
+		file, err := os.ReadFile(configPath)
+		if err != nil {
+			logger.ErrorLogger.Panic(err)
+		}
+		fileContents := string(file)
+		isFileEmpty = len(fileContents) == 0
+	}
+
+	result := fileExists && !isFileEmpty
+
+	return result, configPath
 }
 
 func GetConfig() IgittConfig {
 	configExists, configPath := HasConfigFile()
 	if !configExists {
-		logger.ErrorLogger.Fatal("Config file does not exist, creating one now")
+		logger.ErrorLogger.Print("Config file does not exist, creating one now")
+
 		err := InitialConfig()
+
 		if err != nil {
-			logger.ErrorLogger.Fatal(err)
+			logger.ErrorLogger.Panic(err)
 			return IgittConfig{}
 		}
 	}
 
 	config, err := ReadConfigFromPath(configPath)
 	if err != nil {
-		logger.ErrorLogger.Fatal(err)
+		logger.ErrorLogger.Panic(err)
 		return IgittConfig{}
 	}
 
@@ -93,7 +108,7 @@ func GetDefaultConfig() string {
 	configContent := `# This is the configuration for Igitt.
 # Please adjust the values as needed.
 
-# Choices: "emoji", "unicode", "nerdfont"
+# Choices: "emoji", "unicode", "nerdfont", "ascii" - Default: "unicode"
 iconType: "unicode"
 `
 
@@ -104,10 +119,10 @@ func GetConfigPath(print bool) string {
 	configExists, configPath := HasConfigFile()
 
 	if !configExists {
-		logger.ErrorLogger.Fatal("Config file does not exist, creating one now")
+		logger.ErrorLogger.Print("Config file does not exist, creating one now")
 		err := InitialConfig()
 		if err != nil {
-			logger.ErrorLogger.Fatal(err)
+			logger.ErrorLogger.Panic(err)
 			return ""
 		}
 	}

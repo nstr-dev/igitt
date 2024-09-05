@@ -103,11 +103,44 @@ jobs:
           path: |
             out/igitt*
 
+  build-windows-setup:
+    needs: build
+    runs-on: windows-latest
+    env:
+      LATEST_TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: igitt-windows-amd64-*
+
+      - name: Copy Build Artifacts
+        run: |
+          cp igitt-windows-amd64-*/* .
+
+      - name: Compile .ISS to .EXE Installer
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
+        with:
+          path: ./igitt-setup.iss
+          options: /Oout
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: igitt-setup-windows-amd64-${{ env.LATEST_TAG }}
+          path: |
+            out/igitt*
+
   pre-release:
     permissions:
       contents: write
     if: startsWith(github.ref, 'refs/tags/')
-    needs: build
+    needs: build-windows-setup
     runs-on: ubuntu-latest
 
     steps:
