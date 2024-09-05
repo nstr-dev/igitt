@@ -166,7 +166,7 @@ jobs:
           files: |
             igitt-*
           token: ${{ secrets.GITHUB_TOKEN }}
-          name: "Automatic Pre-Release: ${{ github.ref_name }}"
+          name: "${{ github.ref_name }}"
           body: |
             This is an automatic pre-release build. See the generated release notes below
           generate_release_notes: true
