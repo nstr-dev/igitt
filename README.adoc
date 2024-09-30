@@ -1,0 +1,98 @@
+= Igitt - Interactive Git in the Terminal
+
+**Igitt** (Interactive Git in the Terminal) is a terminal-based Git client that brings an interactive experience to users who may be more accustomed to graphical Git clients. It aims to help those who need to operate in environments like SSH shells or system TTYs where graphical Git tools are unavailable.
+
+With a focus on apprentices, interns, and those newer to Git, **Igitt** offers simplified shortcuts and command descriptions that make the Git command-line interface (CLI) more accessible, while also catering to seasoned Git users who want a faster and more efficient workflow.
+
+== Why Igitt?
+
+Many users, especially beginners, find it difficult to fully grasp Git's CLI. Igitt bridges this gap by providing:
+
+- **Interactive mode** with context-aware commands based on the user's current repository status.
+- **Command shortcuts** that allow users to perform Git operations quickly (e.g., `igt s` for `git status`).
+- **Clear descriptions** for all commands to guide users through their Git operations step by step.
+
+== Installation
+
+To install **Igitt**, check the https://github.com/noahstreller/igitt/releases/latest[GitHub Releases].
+
+== Usage
+
+After installation, you can run **Igitt** from the terminal; on GNU/XNU systems you might need to grant execute permissions using `chmod`.
+
+=== Interactive Mode
+
+Start the interactive mode with:
+[source,bash]
+----
+igitt
+----
+
+Create the `igt` alias with:
+[source,bash]
+----
+igitt igt
+----
+
+This mode will guide you through common Git tasks and suggest the most appropriate commands based on whether you're in a repository or not.
+
+=== Handy shortcuts
+
+- **Check Git Status**:
+[source,bash]
+----
+igt s
+----
+
+- **Commit Changes**:
+[source,bash]
+----
+igt cmt "Your commit message"
+----
+
+- **Clone Remote Repository**:
+[source,bash]
+----
+igt cln "URL"
+----
+
+- **Add Files to Staging Area**:
+[source,bash]
+----
+igt a "file"
+igt + "file"
+----
+
+- **Checkout Branch**:
+[source,bash]
+----
+igt cout "branch"
+----
+
+- **Initialize Alias**:
+[source,bash]
+----
+igitt igt
+igitt mkalias
+----
+
+
+For a full list of available commands, run:
+
+[source,bash]
+----
+igitt help
+----
+
+== Known Issues
+
+[cols="1,3,1,2,1", options="header"]
+|===
+| Issue ID | Description | Affected | Workaround | Status
+
+| IGITT-19
+| If more than one form are rendered using Huh, the first keypress or click is ignored on Windows
+| Windows
+| None, wait for Huh to fix this issue
+| Waiting for external interaction
+|===
