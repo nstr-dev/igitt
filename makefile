@@ -1,20 +1,20 @@
 clean:
 ifeq ($(OS),Windows_NT)
-	powershell -Command "if (Test-Path out) { Remove-Item -Recurse -Force out }"
+	@powershell -Command "if (Test-Path out) { Remove-Item -Recurse -Force out }"
 else
-	rm -rf out
+	@rm -rf out
 endif
 
 build: clean
 ifeq ($(OS),Windows_NT)
-	go build -o out/igitt.exe ./cmd/igitt
+	@go build -o out/igitt.exe ./cmd/igitt
 else
-	go build -o out/igitt ./cmd/igitt
+	@go build -o out/igitt ./cmd/igitt
 endif
 
-run: build
+run:
 ifeq ($(OS),Windows_NT)
-	./out/igitt.exe $(ARGS)
+	@./out/igitt.exe $(ARGS)
 else
-	./out/igitt $(ARGS)
+	@./out/igitt $(ARGS)
 endif

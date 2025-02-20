@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/nstr-dev/igitt/internal/operations"
 	"github.com/nstr-dev/igitt/internal/operations/git"
 	"github.com/nstr-dev/igitt/internal/operations/interactive"
@@ -13,7 +14,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func InitializeIgitt() {
+func InitializeIgitt(version string, commit string, buildDate string) {
+	cyan := color.New(color.FgCyan).SprintfFunc()
+	heading := color.New(color.Bold, color.FgGreen).SprintfFunc()
+
 	var rootCmd = &cobra.Command{
 		Use:   "igitt",
 		Short: "Igitt is an interactive Git client with a CLI.",
@@ -21,7 +25,13 @@ func InitializeIgitt() {
 		Run: func(cmd *cobra.Command, args []string) {
 			logger.InfoLogger.Println("igitt was called without arguments")
 		},
+		Version: ">> Version: " + cyan(version) + "\n>> Commit: " + cyan(commit) + "\n>> Build Date: " + cyan(buildDate),
 	}
+
+	rootCmd.SetVersionTemplate(
+		heading("Igitt - Interactive Git in the Terminal") +
+			"\n=======================================\n\n{{.Version}}",
+	)
 
 	var cloneCmd = &cobra.Command{
 		Use:     "clone [repository]",

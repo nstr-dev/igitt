@@ -5,5 +5,12 @@ import (
 )
 
 func main() {
-	initialize.InitializeIgitt()
+
+	var (
+		version   = "dev"
+		commit    = "none"
+		buildDate = "unknown"
+	)
+
+	initialize.InitializeIgitt(version, commit, buildDate)
 }
