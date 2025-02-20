@@ -7,7 +7,7 @@ import (
 	"runtime"
 
 	"github.com/fatih/color"
-	"github.com/noahstreller/igitt/internal/utilities/logger"
+	"github.com/nstr-dev/igitt/internal/utilities/logger"
 )
 
 func CreateAliasScripts() {

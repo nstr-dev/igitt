@@ -8,9 +8,9 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/fatih/color"
-	"github.com/noahstreller/igitt/internal/operations/git"
-	"github.com/noahstreller/igitt/internal/utilities/config"
-	"github.com/noahstreller/igitt/internal/utilities/logger"
+	"github.com/nstr-dev/igitt/internal/operations/git"
+	"github.com/nstr-dev/igitt/internal/utilities/config"
+	"github.com/nstr-dev/igitt/internal/utilities/logger"
 	"github.com/rivo/uniseg"
 
 	_ "embed"

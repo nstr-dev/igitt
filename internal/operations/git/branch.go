@@ -8,8 +8,8 @@ import (
 
 	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
-	"github.com/noahstreller/igitt/internal/utilities"
-	"github.com/noahstreller/igitt/internal/utilities/logger"
+	"github.com/nstr-dev/igitt/internal/utilities"
+	"github.com/nstr-dev/igitt/internal/utilities/logger"
 )
 
 type BranchResult struct {

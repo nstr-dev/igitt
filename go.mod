@@ -1,4 +1,4 @@
-module github.com/noahstreller/igitt
+module github.com/nstr-dev/igitt
 
 go 1.23.0
 
@@ -39,3 +39,5 @@ require (
 	golang.org/x/term v0.23.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
 )
+
+replace github.com/noahstreller/igitt => github.com/nstr-dev/igitt v0.1.5

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/noahstreller/igitt/internal/utilities/initialize"
+	"github.com/nstr-dev/igitt/internal/utilities/initialize"
 )
 
 func main() {

@@ -4,11 +4,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/noahstreller/igitt/internal/operations"
-	"github.com/noahstreller/igitt/internal/operations/git"
-	"github.com/noahstreller/igitt/internal/operations/interactive"
-	"github.com/noahstreller/igitt/internal/utilities/config"
-	"github.com/noahstreller/igitt/internal/utilities/logger"
+	"github.com/nstr-dev/igitt/internal/operations"
+	"github.com/nstr-dev/igitt/internal/operations/git"
+	"github.com/nstr-dev/igitt/internal/operations/interactive"
+	"github.com/nstr-dev/igitt/internal/utilities/config"
+	"github.com/nstr-dev/igitt/internal/utilities/logger"
 	"github.com/spf13/cobra"
 )
 

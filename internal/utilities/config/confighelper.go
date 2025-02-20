@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/fatih/color"
-	"github.com/noahstreller/igitt/internal/utilities/logger"
+	"github.com/nstr-dev/igitt/internal/utilities/logger"
 	"gopkg.in/yaml.v3"
 )
 
