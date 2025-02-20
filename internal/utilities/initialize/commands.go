@@ -9,6 +9,7 @@ import (
 	"github.com/nstr-dev/igitt/internal/operations/interactive"
 	"github.com/nstr-dev/igitt/internal/utilities/config"
 	"github.com/nstr-dev/igitt/internal/utilities/logger"
+	"github.com/nstr-dev/igitt/internal/utilities/welcome"
 	"github.com/spf13/cobra"
 )
 
@@ -134,10 +135,15 @@ func InitializeIgitt() {
 	}
 
 	cobra.OnInitialize(func() {
-		err := config.InitialConfig()
+		createdNewConfig, err := config.InitialConfig()
 
 		if err != nil {
 			logger.ErrorLogger.Fatal(err)
+			return
+		}
+
+		if createdNewConfig {
+			welcome.PrintWelcomeMessage()
 			return
 		}
 

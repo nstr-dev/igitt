@@ -6,7 +6,15 @@ else
 endif
 
 build: clean
+ifeq ($(OS),Windows_NT)
+	go build -o out/igitt.exe ./cmd/igitt
+else
 	go build -o out/igitt ./cmd/igitt
+endif
 
 run: build
-	./out/igitt i
+ifeq ($(OS),Windows_NT)
+	./out/igitt.exe $(ARGS)
+else
+	./out/igitt $(ARGS)
+endif
