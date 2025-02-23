@@ -1,9 +1,16 @@
 package main
 
 import (
-	"github.com/noahstreller/igitt/internal/utilities/initialize"
+	"github.com/nstr-dev/igitt/internal/utilities/initialize"
 )
 
 func main() {
-	initialize.InitializeIgitt()
+
+	var (
+		version   = "dev"
+		commit    = "none"
+		buildDate = "unknown"
+	)
+
+	initialize.InitializeIgitt(version, commit, buildDate)
 }

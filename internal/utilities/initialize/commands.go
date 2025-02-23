@@ -4,15 +4,20 @@ import (
 	"os"
 	"strings"
 
-	"github.com/noahstreller/igitt/internal/operations"
-	"github.com/noahstreller/igitt/internal/operations/git"
-	"github.com/noahstreller/igitt/internal/operations/interactive"
-	"github.com/noahstreller/igitt/internal/utilities/config"
-	"github.com/noahstreller/igitt/internal/utilities/logger"
+	"github.com/fatih/color"
+	"github.com/nstr-dev/igitt/internal/operations"
+	"github.com/nstr-dev/igitt/internal/operations/git"
+	"github.com/nstr-dev/igitt/internal/operations/interactive"
+	"github.com/nstr-dev/igitt/internal/utilities/config"
+	"github.com/nstr-dev/igitt/internal/utilities/logger"
+	"github.com/nstr-dev/igitt/internal/utilities/welcome"
 	"github.com/spf13/cobra"
 )
 
-func InitializeIgitt() {
+func InitializeIgitt(version string, commit string, buildDate string) {
+	cyan := color.New(color.FgCyan).SprintfFunc()
+	heading := color.New(color.Bold, color.FgGreen).SprintfFunc()
+
 	var rootCmd = &cobra.Command{
 		Use:   "igitt",
 		Short: "Igitt is an interactive Git client with a CLI.",
@@ -20,7 +25,13 @@ func InitializeIgitt() {
 		Run: func(cmd *cobra.Command, args []string) {
 			logger.InfoLogger.Println("igitt was called without arguments")
 		},
+		Version: ">> Version: " + cyan(version) + "\n>> Commit: " + cyan(commit) + "\n>> Build Date: " + cyan(buildDate),
 	}
+
+	rootCmd.SetVersionTemplate(
+		heading("Igitt - Interactive Git in the Terminal") +
+			"\n=======================================\n\n{{.Version}}",
+	)
 
 	var cloneCmd = &cobra.Command{
 		Use:     "clone [repository]",
@@ -134,10 +145,15 @@ func InitializeIgitt() {
 	}
 
 	cobra.OnInitialize(func() {
-		err := config.InitialConfig()
+		createdNewConfig, err := config.InitialConfig()
 
 		if err != nil {
 			logger.ErrorLogger.Fatal(err)
+			return
+		}
+
+		if createdNewConfig {
+			welcome.PrintWelcomeMessage()
 			return
 		}
 

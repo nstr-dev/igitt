@@ -8,9 +8,9 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/fatih/color"
-	"github.com/noahstreller/igitt/internal/operations/git"
-	"github.com/noahstreller/igitt/internal/utilities/config"
-	"github.com/noahstreller/igitt/internal/utilities/logger"
+	"github.com/nstr-dev/igitt/internal/operations/git"
+	"github.com/nstr-dev/igitt/internal/utilities/config"
+	"github.com/nstr-dev/igitt/internal/utilities/logger"
 	"github.com/rivo/uniseg"
 
 	_ "embed"
@@ -59,10 +59,6 @@ type CommandFlowResult struct {
 const iconWidth = 3
 const shortcutsEnabled = false
 
-var iconVariant = getIconVariantFromConfig()
-
-// var iconVariant = Unicode
-
 func getIconVariantFromConfig() IconType {
 	config := config.GetConfig()
 	userIconType := strings.ToLower(config.IconType)
@@ -83,13 +79,13 @@ func getIconVariantFromConfig() IconType {
 }
 
 func getTitle(command Command) string {
-	if iconVariant == Emoji {
+	if getIconVariantFromConfig() == Emoji {
 		return command.IconEmoji + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconEmoji)) + command.Name
 	}
-	if iconVariant == NerdFont {
+	if getIconVariantFromConfig() == NerdFont {
 		return command.IconNerdFont + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconNerdFont)) + command.Name
 	}
-	if iconVariant == Ascii {
+	if getIconVariantFromConfig() == Ascii {
 		return command.IconAscii + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.Icon)) + command.Name
 	}
 	return command.Icon + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.Icon)) + command.Name
@@ -192,7 +188,7 @@ func StartInteractive() {
 	var interactiveTitleText string
 	var interactiveByeText string
 
-	if iconVariant == Ascii {
+	if getIconVariantFromConfig() == Ascii {
 		interactiveTitleText = "[ Igitt Interactive ]\n"
 		interactiveByeText = "[ Bye ]\n"
 	} else {
@@ -287,7 +283,7 @@ func StartInteractive() {
 			huh.NewGroup(
 				huh.NewInput().
 					Title("Link to Git repository").
-					Description("\n" + getLinkIcon(iconVariant) + "Enter the link to your repository here.\n").
+					Description("\n" + getLinkIcon(getIconVariantFromConfig()) + "Enter the link to your repository here.\n").
 					Suggestions([]string{
 						"https://github.com/",
 						"https://gitlab.com/",
@@ -309,7 +305,7 @@ func StartInteractive() {
 			huh.NewGroup(
 				huh.NewInput().
 					Title("Commit message").
-					Description("\n" + getCommitIcon(iconVariant) + "Type a short description to the commit.\n").
+					Description("\n" + getCommitIcon(getIconVariantFromConfig()) + "Type a short description to the commit.\n").
 					Suggestions([]string{
 						"feat: ",
 						"fix: ",
@@ -339,7 +335,7 @@ func StartInteractive() {
 							"\n%s: %s\n\n   %s  %s\n\n",
 							getTitle(commandFlowResult.SelectedCommand),
 							commandFlowResult.SelectedCommand.Description,
-							getNextStepIcon(iconVariant),
+							getNextStepIcon(getIconVariantFromConfig()),
 							"Next step: "+commandFlowResult.SelectedCommand.NextStepTitle,
 						)
 					}
@@ -348,7 +344,7 @@ func StartInteractive() {
 						"\n%s: %s\n\n   %s  %s next steps\n\n",
 						getTitle(commandFlowResult.SelectedCommand),
 						commandFlowResult.SelectedCommand.Description,
-						getNoNextStepIcon(iconVariant),
+						getNoNextStepIcon(getIconVariantFromConfig()),
 						"No",
 					)
 				}, &commandFlowResult.SelectedCommand).

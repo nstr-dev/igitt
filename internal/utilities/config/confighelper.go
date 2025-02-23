@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/fatih/color"
-	"github.com/noahstreller/igitt/internal/utilities/logger"
+	"github.com/nstr-dev/igitt/internal/utilities/logger"
 	"gopkg.in/yaml.v3"
 )
 
@@ -16,30 +16,30 @@ type IgittConfig struct {
 	IconType string `yaml:"iconType"`
 }
 
-func InitialConfig() error {
+func InitialConfig() (bool, error) {
 	configExists, configPath := HasConfigFile()
 
 	if configExists {
-		return nil
+		return false, nil
 	}
 
 	file, err := os.OpenFile(configPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 
 	if err != nil {
 		logger.ErrorLogger.Panic(err)
-		return err
+		return false, err
 	}
 
 	_, err = file.Write([]byte(GetDefaultConfig()))
 
 	if err != nil {
 		logger.ErrorLogger.Panic(err)
-		return err
+		return false, err
 	}
 
 	defer file.Close()
 
-	return nil
+	return true, nil
 }
 
 func HasConfigFile() (bool, string) {
@@ -74,7 +74,7 @@ func GetConfig() IgittConfig {
 	if !configExists {
 		logger.ErrorLogger.Print("Config file does not exist, creating one now")
 
-		err := InitialConfig()
+		_, err := InitialConfig()
 
 		if err != nil {
 			logger.ErrorLogger.Panic(err)
@@ -120,7 +120,7 @@ func GetConfigPath(print bool) string {
 
 	if !configExists {
 		logger.ErrorLogger.Print("Config file does not exist, creating one now")
-		err := InitialConfig()
+		_, err := InitialConfig()
 		if err != nil {
 			logger.ErrorLogger.Panic(err)
 			return ""

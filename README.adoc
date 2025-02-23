@@ -14,7 +14,7 @@ Many users, especially beginners, find it difficult to fully grasp Git's CLI. Ig
 
 == Installation
 
-To install **Igitt**, check the https://github.com/noahstreller/igitt/releases/latest[GitHub Releases].
+To install **Igitt**, check the https://github.com/nstr-dev/igitt/releases/latest[GitHub Releases].
 
 == Usage
 

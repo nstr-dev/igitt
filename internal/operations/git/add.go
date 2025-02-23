@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/briandowns/spinner"
-	"github.com/noahstreller/igitt/internal/utilities"
-	"github.com/noahstreller/igitt/internal/utilities/logger"
+	"github.com/nstr-dev/igitt/internal/utilities"
+	"github.com/nstr-dev/igitt/internal/utilities/logger"
 )
 
 func AddChanges(arguments string) {

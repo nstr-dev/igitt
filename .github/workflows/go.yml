@@ -91,9 +91,9 @@ jobs:
       - name: Build
         run: |
           if [[ "${{ matrix.goos }}" == "windows" ]]; then \
-            go build -v -o out/igitt.exe ./cmd/igitt; \
+            go build -ldflags "-X main.version=$(git describe --tags --always) -X main.commit=$(git rev-parse --short HEAD) -X main.buildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)" -v -o out/igitt.exe ./cmd/igitt; \
           else \
-            go build -v -o out/igitt ./cmd/igitt; \
+            go build -ldflags "-X main.version=$(git describe --tags --always) -X main.commit=$(git rev-parse --short HEAD) -X main.buildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)" -v -o out/igitt ./cmd/igitt; \
           fi
 
       - name: Upload Build Artifact
