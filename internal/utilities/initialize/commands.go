@@ -152,12 +152,11 @@ func InitializeIgitt(version string, commit string, buildDate string) {
 			return
 		}
 
-		if createdNewConfig {
-			welcome.PrintWelcomeMessage()
-			return
-		}
-
 		if len(os.Args) == 1 {
+			if createdNewConfig {
+				welcome.PrintWelcomeMessage()
+				return
+			}
 			interactive.StartInteractive()
 		}
 	})
