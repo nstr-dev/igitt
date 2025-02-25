@@ -127,14 +127,14 @@ jobs:
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
         with:
           path: ./igitt-setup.iss
-          options: /Oout
+          options: /iss-out
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: igitt-setup-windows-amd64-${{ env.LATEST_TAG }}
           path: |
-            out/igitt*
+            iss-out/igitt*
 
   pre-release:
     permissions:
@@ -152,7 +152,11 @@ jobs:
       - name: Create ZIP Archives
         run: |
           for dir in igitt-*; do
-            zip -r "${dir}.zip" "$dir"
+            if [[ "$dir" == igitt-setup-windows-* ]]; then
+              mv "$dir/igitt-setup.exe" "${dir}.exe"
+            else
+              zip -j "${dir}.zip" "$dir"/*
+            fi
           done
 
       - name: debug-tree
