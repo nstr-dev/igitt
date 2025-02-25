@@ -2,7 +2,6 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Igitt"
-#define MyAppVersion "v0.1.2"
 #define MyAppPublisher "nstr.dev"
 #define MyAppURL "nstr.dev"
 #define MyAppExeName "igitt.exe"

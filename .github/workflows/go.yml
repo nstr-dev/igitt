@@ -127,7 +127,7 @@ jobs:
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
         with:
           path: ./igitt-setup.iss
-          options: /Oiss-out
+          options: "/DMyAppVersion=${{ env.LATEST_TAG }} /Oiss-out"
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
