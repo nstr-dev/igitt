@@ -6,10 +6,14 @@
 #define MyAppURL "nstr.dev"
 #define MyAppExeName "igitt.exe"
 
+#ifndef MyAppVersion
+  #define MyAppVersion "1.0.0"
+#endif
+
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{643823B7-A3B0-4F56-88F2-D307E341A670}
+AppId={643823B7-A3B0-4F56-88F2-D307E341A670}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -29,24 +33,37 @@ ArchitecturesInstallIn64BitMode=x64compatible
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 ; Remove the following line to run in administrative install mode (install for all users.)
-PrivilegesRequired=lowest
+PrivilegesRequired=admin
 PrivilegesRequiredOverridesAllowed=dialog
 OutputBaseFilename=igitt-setup
 OutputDir=.innosetup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
+ChangesEnvironment=yes
+UninstallDisplayName={#MyAppName}
+UninstallDisplayIcon={app}\{#MyAppExeName}
 
-
+[UninstallDelete]
+Type: filesandordirs; Name: "{app}"
 
 [Registry]
-; Add your program's directory to the PATH environment variable
-Root: HKCU; Subkey: "Environment"; ValueType: expandsz; ValueName: "PATH"; \
-    ValueData: "{olddata};{app}";
+; Add program directory to PATH for current user if the checkbox is selected
+Root: HKCU; Subkey: "Environment"; ValueType: expandsz; ValueName: "Path"; \
+  ValueData: "{olddata};{app}"; Flags: preserveexisting; Check: ShouldAddPathCheck
 
-[Setup]
-; Tell Windows Explorer to reload the environment
-ChangesEnvironment=yes
+; Register application for "Add/Remove Programs"
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}"; \
+  ValueType: string; ValueName: "DisplayName"; ValueData: "{#MyAppName}"
+
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}"; \
+  ValueType: string; ValueName: "UninstallString"; ValueData: """{uninstallexe}"""
+
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}"; \
+  ValueType: string; ValueName: "DisplayVersion"; ValueData: "{#MyAppVersion}"
+
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}"; \
+  ValueType: string; ValueName: "Publisher"; ValueData: "{#MyAppPublisher}"
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -61,3 +78,66 @@ Source: ".innosetup\igittconfig.yaml"; DestDir: "{app}";
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 
+[Code]
+var
+  AddToPathPage: TInputOptionWizardPage;
+
+function NeedsAddPath(Param: string): Boolean;
+var
+  OrigPath: string;
+begin
+  if not RegQueryStringValue(HKCU, 'Environment', 'Path', OrigPath) then
+  begin
+    Result := True;
+    exit;
+  end;
+  { Ensure we search for ;Param; in a consistent case to prevent duplicates }
+  Result := Pos(';' + UpperCase(Param) + ';', ';' + UpperCase(OrigPath) + ';') = 0;
+end;
+
+function ShouldAddPathCheck: Boolean;
+begin
+  { Return true only if the user has checked the option and the path isn’t already present }
+  Result := AddToPathPage.Values[0] and NeedsAddPath('{app}');
+end;
+
+procedure RemoveFromPath();
+var
+  PathValue: string;
+  AppPath: string;
+begin
+  if RegQueryStringValue(HKCU, 'Environment', 'Path', PathValue) then
+  begin
+    AppPath := ExpandConstant('{app}');
+    { Remove only our application's path safely }
+    StringChangeEx(PathValue, ';' + AppPath, '', True);
+    StringChangeEx(PathValue, AppPath + ';', '', True);
+    StringChangeEx(PathValue, AppPath, '', True);
+    { Save the modified PATH value or delete the key if it's empty }
+    if PathValue <> '' then
+      RegWriteStringValue(HKCU, 'Environment', 'Path', PathValue)
+    else
+      RegDeleteValue(HKCU, 'Environment', 'Path');
+  end;
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep = usPostUninstall then  { Run after uninstallation }
+  begin
+    RemoveFromPath();
+  end;
+end;
+
+procedure InitializeWizard;
+begin
+  { Create a custom page after the Select Destination Location page }
+  AddToPathPage := CreateInputOptionPage(wpSelectDir,
+    'Additional Options',
+    'Select additional options:',
+    'Choose whether to add the application folder to the PATH environment variable.',
+    True, False);
+  AddToPathPage.Add('Add application folder to PATH');
+  { Set default state (checked) }
+  AddToPathPage.Values[0] := True;
+end;
