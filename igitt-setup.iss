@@ -13,7 +13,7 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={643823B7-A3B0-4F56-88F2-D307E341A670}
+AppId=239D7644-5A09-407F-A751-13577B4845BC
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -33,8 +33,8 @@ ArchitecturesInstallIn64BitMode=x64compatible
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 ; Remove the following line to run in administrative install mode (install for all users.)
-PrivilegesRequired=admin
-PrivilegesRequiredOverridesAllowed=dialog
+PrivilegesRequired=lowest
+; PrivilegesRequiredOverridesAllowed=dialog
 OutputBaseFilename=igitt-setup
 OutputDir=.innosetup
 Compression=lzma
@@ -50,19 +50,19 @@ Type: filesandordirs; Name: "{app}"
 [Registry]
 ; Add program directory to PATH for current user if the checkbox is selected
 Root: HKCU; Subkey: "Environment"; ValueType: expandsz; ValueName: "Path"; \
-  ValueData: "{olddata};{app}"; Flags: preserveexisting; Check: ShouldAddPathCheck
+  ValueData: "{olddata};{app}"; Check: ShouldAddPathCheck
 
 ; Register application for "Add/Remove Programs"
-Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}"; \
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}"; \
   ValueType: string; ValueName: "DisplayName"; ValueData: "{#MyAppName}"
 
-Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}"; \
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}"; \
   ValueType: string; ValueName: "UninstallString"; ValueData: """{uninstallexe}"""
 
-Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}"; \
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}"; \
   ValueType: string; ValueName: "DisplayVersion"; ValueData: "{#MyAppVersion}"
 
-Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}"; \
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}"; \
   ValueType: string; ValueName: "Publisher"; ValueData: "{#MyAppPublisher}"
 
 [Languages]
@@ -138,6 +138,7 @@ begin
     'Choose whether to add the application folder to the PATH environment variable.',
     True, False);
   AddToPathPage.Add('Add application folder to PATH');
+  AddToPathPage.Add('Do not add folder to PATH');
   { Set default state (checked) }
   AddToPathPage.Values[0] := True;
 end;
