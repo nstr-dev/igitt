@@ -191,6 +191,11 @@ func GetStagedModificationCount() (int, error) {
 	statusLines := strings.Split(statusWithoutEmptyLine, "\n")
 
 	stagedCount := 0
+
+	if len(statusLines) == 0 {
+		return stagedCount, nil
+	}
+
 	for _, line := range statusLines {
 		if line[0] != ' ' {
 			stagedCount++
