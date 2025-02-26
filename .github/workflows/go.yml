@@ -91,7 +91,7 @@ jobs:
       - name: Build
         run: |
           if [[ "${{ matrix.goos }}" == "windows" ]]; then \
-            go build -ldflags "-X main.version=$(git describe --tags --always) -X main.commit=$(git rev-parse --short HEAD) -X main.buildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)" -v -o out/igitt.exe ./cmd/igitt; \
+            go build -ldflags "-X main.Version=$(git describe --tags --always) -X main.Commit=$(git rev-parse --short HEAD) -X main.BuildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)" -v -o out/igitt.exe ./cmd/igitt; \
           else \
             go build -ldflags "-X main.version=$(git describe --tags --always) -X main.commit=$(git rev-parse --short HEAD) -X main.buildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)" -v -o out/igitt ./cmd/igitt; \
           fi

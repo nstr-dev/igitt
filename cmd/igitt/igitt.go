@@ -4,13 +4,12 @@ import (
 	"github.com/nstr-dev/igitt/internal/utilities/initialize"
 )
 
+var (
+	Version   = "dev"
+	Commit    = "none"
+	BuildDate = "unknown"
+)
+
 func main() {
-
-	var (
-		version   = "dev"
-		commit    = "none"
-		buildDate = "unknown"
-	)
-
-	initialize.InitializeIgitt(version, commit, buildDate)
+	initialize.InitializeIgitt(Version, Commit, BuildDate)
 }
