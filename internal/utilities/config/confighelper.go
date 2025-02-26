@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/fatih/color"
+	"github.com/nstr-dev/igitt/internal/utilities"
 	"github.com/nstr-dev/igitt/internal/utilities/logger"
 	"gopkg.in/yaml.v3"
 )
@@ -13,7 +14,8 @@ import (
 const configFileName = "igittconfig.yaml"
 
 type IgittConfig struct {
-	IconType string `yaml:"iconType"`
+	IconType        string `yaml:"iconType"`
+	ShowAllCommands bool   `yaml:"showAllCommands"`
 }
 
 func InitialConfig() (bool, error) {
@@ -84,8 +86,8 @@ func GetConfig() IgittConfig {
 
 	config, err := ReadConfigFromPath(configPath)
 	if err != nil {
-		logger.ErrorLogger.Panic(err)
-		return IgittConfig{}
+		utilities.PrintGeneralError(fmt.Sprintf("Failed to read the configuration at:\n%s.\n\nYou can either fix it or delete it to generate a new configuration file.", configPath))
+		logger.ErrorLogger.Fatal("Failed to read the configuration. Perhaps it is invalid?")
 	}
 
 	return config
@@ -110,6 +112,10 @@ func GetDefaultConfig() string {
 
 # Choices: "emoji", "unicode", "nerdfont", "ascii" - Default: "unicode"
 iconType: "unicode"
+
+# Show all commands in the interactive mode, even if not in a Git repository.
+# Default: false
+showAllCommands: false
 `
 
 	return configContent

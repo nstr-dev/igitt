@@ -121,7 +121,7 @@ func getModifications() ([]FileStatus, error) {
 	status, err := runGitStatus()
 	if err != nil {
 		logger.ErrorLogger.Println("Failed previous step, aborting: ", err)
-		utilities.PrintError(status)
+		utilities.PrintGitError(status)
 		return nil, err
 	}
 
@@ -155,6 +155,57 @@ func getModifications() ([]FileStatus, error) {
 	})
 
 	return statuses, nil
+}
+
+func GetTotalModificationCount() (int, error) {
+	status, err := runGitStatus()
+	if err != nil {
+		logger.ErrorLogger.Println("Failed previous step, aborting: ", err)
+		utilities.PrintGitError(status)
+		return 0, err
+	}
+
+	statusWithoutEmptyLine := utilities.RemoveLastEmptyLine(status)
+	statusLines := strings.Split(statusWithoutEmptyLine, "\n")
+
+	return len(statusLines), nil
+}
+
+func GetTotalModificationCountAsString() string {
+	modificationCount, err := GetTotalModificationCount()
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%d", modificationCount)
+}
+
+func GetStagedModificationCount() (int, error) {
+	status, err := runGitStatus()
+	if err != nil {
+		logger.ErrorLogger.Println("Failed previous step, aborting: ", err)
+		utilities.PrintGitError(status)
+		return 0, err
+	}
+
+	statusWithoutEmptyLine := utilities.RemoveLastEmptyLine(status)
+	statusLines := strings.Split(statusWithoutEmptyLine, "\n")
+
+	stagedCount := 0
+	for _, line := range statusLines {
+		if line[0] != ' ' {
+			stagedCount++
+		}
+	}
+
+	return stagedCount, nil
+}
+
+func GetStagedModificationCountAsString() string {
+	modificationCount, err := GetStagedModificationCount()
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%d", modificationCount)
 }
 
 func runGitStatus() (string, error) {

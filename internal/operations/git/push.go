@@ -19,7 +19,7 @@ func PushRemote() {
 
 	if errOut != nil {
 		logger.ErrorLogger.Println("Error pushing to remote repository:", errOut, string(byteOut))
-		utilities.PrintError(string(byteOut))
+		utilities.PrintGitError(string(byteOut))
 		return
 	}
 	logger.InfoLogger.Println("Pushing to remote repository:", errOut, string(byteOut))

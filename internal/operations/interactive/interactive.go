@@ -9,7 +9,9 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/fatih/color"
 	"github.com/nstr-dev/igitt/internal/operations/git"
+	"github.com/nstr-dev/igitt/internal/utilities"
 	"github.com/nstr-dev/igitt/internal/utilities/config"
+	"github.com/nstr-dev/igitt/internal/utilities/icons"
 	"github.com/nstr-dev/igitt/internal/utilities/logger"
 	"github.com/rivo/uniseg"
 
@@ -20,29 +22,25 @@ import (
 var commandJSON []byte
 
 const (
-	Unicode IconType = iota
+	Unicode icons.IconType = iota
 	Emoji
 	NerdFont
 	Ascii
 )
 
-type IconType int
-
-func (d IconType) String() string {
-	return [...]string{"unicode", "emoji", "nerdfont", "ascii"}[d]
-}
-
 type Command struct {
-	Id            string `json:"id"`
-	Icon          string `json:"icon"`
-	IconEmoji     string `json:"icon_emoji"`
-	IconNerdFont  string `json:"icon_nerdfont"`
-	IconAscii     string `json:"icon_ascii"`
-	Name          string `json:"name"`
-	Shortcut      string `json:"shortcut"`
-	Description   string `json:"description"`
-	NextStep      string `json:"nextStep"`
-	NextStepTitle string `json:"nextStepTitle"`
+	Id              string `json:"id"`
+	Icon            string `json:"icon"`
+	IconEmoji       string `json:"icon_emoji"`
+	IconNerdFont    string `json:"icon_nerdfont"`
+	IconAscii       string `json:"icon_ascii"`
+	Name            string `json:"name"`
+	Shortcut        string `json:"shortcut"`
+	Description     string `json:"description"`
+	NextStep        string `json:"nextStep"`
+	NextStepTitle   string `json:"nextStepTitle"`
+	InsideRepoOnly  bool   `json:"insideRepoOnly"`
+	OutsideRepoOnly bool   `json:"outsideRepoOnly"`
 }
 
 type CommandFlowResult struct {
@@ -59,7 +57,7 @@ type CommandFlowResult struct {
 const iconWidth = 3
 const shortcutsEnabled = false
 
-func getIconVariantFromConfig() IconType {
+func getIconVariantFromConfig() icons.IconType {
 	config := config.GetConfig()
 	userIconType := strings.ToLower(config.IconType)
 
@@ -78,6 +76,11 @@ func getIconVariantFromConfig() IconType {
 	return Unicode
 }
 
+func getShowAllCommandsFromConfig() bool {
+	config := config.GetConfig()
+	return config.ShowAllCommands
+}
+
 func getTitle(command Command) string {
 	if getIconVariantFromConfig() == Emoji {
 		return command.IconEmoji + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.IconEmoji)) + command.Name
@@ -89,56 +92,6 @@ func getTitle(command Command) string {
 		return command.IconAscii + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.Icon)) + command.Name
 	}
 	return command.Icon + strings.Repeat(" ", iconWidth-uniseg.StringWidth(command.Icon)) + command.Name
-}
-
-func getNextStepIcon(variant IconType) string {
-	if variant == Emoji {
-		return "⏩"
-	}
-	if variant == NerdFont {
-		return ""
-	}
-	if variant == Ascii {
-		return ">"
-	}
-	return "↪"
-}
-
-func getNoNextStepIcon(variant IconType) string {
-	if variant == Emoji {
-		return "🎯"
-	}
-	if variant == NerdFont {
-		return ""
-	}
-	if variant == Ascii {
-		return "#"
-	}
-	return "◎"
-}
-
-func getLinkIcon(variant IconType) string {
-	if variant == Emoji {
-		return "🔗  "
-	}
-	if variant == NerdFont {
-		return "  "
-	}
-	return ""
-}
-
-func getCommitIcon(variant IconType) string {
-	if variant == Emoji {
-		return "📝  "
-	}
-	if variant == NerdFont {
-		return "  "
-	}
-	if variant == Ascii {
-		return ""
-
-	}
-	return "✎  "
 }
 
 func getBranchOptions() []huh.Option[string] {
@@ -197,10 +150,34 @@ func StartInteractive() {
 	}
 
 	interactiveTitle(interactiveTitleText)
+	var allCommands []Command
 	var commands []Command
+
 	formGroups := make(map[string]*huh.Form)
 
-	_ = json.Unmarshal(commandJSON, &commands)
+	err := json.Unmarshal(commandJSON, &allCommands)
+
+	if err != nil {
+		logger.ErrorLogger.Fatal(err)
+	}
+
+	for _, command := range allCommands {
+		if getShowAllCommandsFromConfig() {
+			commands = allCommands
+			break
+		}
+
+		if command.InsideRepoOnly && !utilities.CheckIsRepo() {
+			continue
+		}
+
+		if command.OutsideRepoOnly && utilities.CheckIsRepo() {
+			continue
+		}
+
+		commands = append(commands, command)
+	}
+
 	commandOptions := make([]huh.Option[Command], len(commands))
 
 	for i, c := range commands {
@@ -283,7 +260,7 @@ func StartInteractive() {
 			huh.NewGroup(
 				huh.NewInput().
 					Title("Link to Git repository").
-					Description("\n" + getLinkIcon(getIconVariantFromConfig()) + "Enter the link to your repository here.\n").
+					Description("\n" + icons.GetLinkIcon(getIconVariantFromConfig()) + "Enter the link to your repository here.\n").
 					Suggestions([]string{
 						"https://github.com/",
 						"https://gitlab.com/",
@@ -305,7 +282,11 @@ func StartInteractive() {
 			huh.NewGroup(
 				huh.NewInput().
 					Title("Commit message").
-					Description("\n" + getCommitIcon(getIconVariantFromConfig()) + "Type a short description to the commit.\n").
+					Description("\n" +
+						icons.GetCommitIcon(getIconVariantFromConfig()) +
+						"Type a short description to the commit.\n\n" +
+						icons.GetBranchIcon(getIconVariantFromConfig()) + "  " + git.GetBranches().CheckedOutBranch + "\n" +
+						"Files changed: " + git.GetStagedModificationCountAsString() + "\n").
 					Suggestions([]string{
 						"feat: ",
 						"fix: ",
@@ -335,7 +316,7 @@ func StartInteractive() {
 							"\n%s: %s\n\n   %s  %s\n\n",
 							getTitle(commandFlowResult.SelectedCommand),
 							commandFlowResult.SelectedCommand.Description,
-							getNextStepIcon(getIconVariantFromConfig()),
+							icons.GetNextStepIcon(getIconVariantFromConfig()),
 							"Next step: "+commandFlowResult.SelectedCommand.NextStepTitle,
 						)
 					}
@@ -344,7 +325,7 @@ func StartInteractive() {
 						"\n%s: %s\n\n   %s  %s next steps\n\n",
 						getTitle(commandFlowResult.SelectedCommand),
 						commandFlowResult.SelectedCommand.Description,
-						getNoNextStepIcon(getIconVariantFromConfig()),
+						icons.GetNoNextStepIcon(getIconVariantFromConfig()),
 						"No",
 					)
 				}, &commandFlowResult.SelectedCommand).
@@ -353,7 +334,7 @@ func StartInteractive() {
 		),
 	).WithTheme(theme).WithHeight(len(commands) + 9)
 
-	err := mainForm.Run()
+	err = mainForm.Run()
 	if err != nil {
 		fmt.Println(color.HiRedString(interactiveByeText))
 		logger.ErrorLogger.Fatal(err)
@@ -485,9 +466,21 @@ func runResultingCommand() {
 		return
 	}
 
+	if commandFlowResult.SelectedCommand.Id == "op-add" && commandFlowResult.GitAddArguments == "" {
+		logger.InfoLogger.Println("add command selected with no arguments, sending to operations")
+		git.AddEverything()
+		return
+	}
+
 	if commandFlowResult.SelectedCommand.Id == "op-add" && commandFlowResult.GitAddArguments != "" {
 		logger.InfoLogger.Println("add command selected, sending to operations")
 		git.AddChanges(commandFlowResult.GitAddArguments)
+		return
+	}
+
+	if commandFlowResult.SelectedCommand.Id == "igitt-config" {
+		logger.InfoLogger.Println("config command selected, printing config path")
+		config.GetConfigPath(true)
 		return
 	}
 }

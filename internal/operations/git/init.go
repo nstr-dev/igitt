@@ -25,7 +25,7 @@ func InitRepository() {
 
 	if errOut != nil {
 		logger.ErrorLogger.Println("Error initializing Git repository:", errOut, string(byteOut))
-		utilities.PrintError(string(byteOut))
+		utilities.PrintGitError(string(byteOut))
 		return
 	}
 	logger.InfoLogger.Println("Initializing Git repository:", errOut, string(byteOut))

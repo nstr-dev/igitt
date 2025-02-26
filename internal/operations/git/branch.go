@@ -36,7 +36,7 @@ func GetBranches() BranchResult {
 
 	if errOut != nil {
 		logger.ErrorLogger.Println("Error:", errOut, string(byteOut))
-		utilities.PrintError(string(byteOut))
+		utilities.PrintGitError(string(byteOut))
 		return BranchResult{}
 	}
 
@@ -82,7 +82,7 @@ func DoCustomBranchAction(arguments string) {
 
 		if errOut != nil {
 			logger.ErrorLogger.Println("Error running branch command:", errOut, string(byteOut))
-			utilities.PrintError(string(byteOut))
+			utilities.PrintGitError(string(byteOut))
 			return
 		}
 
@@ -100,7 +100,7 @@ func DoCustomBranchAction(arguments string) {
 
 	if errOut != nil {
 		logger.ErrorLogger.Println("Error running branch command:", errOut, string(byteOut))
-		utilities.PrintError(string(byteOut))
+		utilities.PrintGitError(string(byteOut))
 		return
 	}
 
@@ -116,7 +116,7 @@ func CheckoutBranch(branch string) {
 
 	if errOut != nil {
 		logger.ErrorLogger.Println("Error checking out:", errOut, string(byteOut))
-		utilities.PrintError(string(byteOut))
+		utilities.PrintGitError(string(byteOut))
 		return
 	}
 
@@ -132,7 +132,7 @@ func CreateBranch(branch string) {
 
 	if errOut != nil {
 		logger.ErrorLogger.Println("Error creating branch:", errOut, string(byteOut))
-		utilities.PrintError(string(byteOut))
+		utilities.PrintGitError(string(byteOut))
 		return
 	}
 
@@ -148,7 +148,7 @@ func DeleteBranch(branch string) {
 
 	if errOut != nil {
 		logger.ErrorLogger.Println("Error deleting branch:", errOut, string(byteOut))
-		utilities.PrintError(string(byteOut))
+		utilities.PrintGitError(string(byteOut))
 		return
 	}
 
@@ -164,7 +164,7 @@ func RenameBranch(oldBranch string, newBranch string) {
 
 	if errOut != nil {
 		logger.ErrorLogger.Println("Error renaming branch:", errOut, string(byteOut))
-		utilities.PrintError(string(byteOut))
+		utilities.PrintGitError(string(byteOut))
 		return
 	}
 
