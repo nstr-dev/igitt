@@ -52,19 +52,6 @@ Type: filesandordirs; Name: "{app}"
 Root: HKCU; Subkey: "Environment"; ValueType: expandsz; ValueName: "Path"; \
   ValueData: "{olddata};{app}"; Check: ShouldAddPathCheck
 
-; Register application for "Add/Remove Programs"
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}"; \
-  ValueType: string; ValueName: "DisplayName"; ValueData: "{#MyAppName}"
-
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}"; \
-  ValueType: string; ValueName: "UninstallString"; ValueData: """{uninstallexe}"""
-
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}"; \
-  ValueType: string; ValueName: "DisplayVersion"; ValueData: "{#MyAppVersion}"
-
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}"; \
-  ValueType: string; ValueName: "Publisher"; ValueData: "{#MyAppPublisher}"
-
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
