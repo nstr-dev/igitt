@@ -17,7 +17,7 @@ jobs:
           $wingetPackage = "Nstr.Igitt"
           $gitToken = "${{ secrets.NSTR_WINGET_TOKEN }}"
 
-          $github = Invoke-RestMethod -uri "https://api.github.com/repos/nstr-dev/igitt/releases" 
+          $github = Invoke-RestMethod -uri "https://api.github.com/repos/nstr-dev/igitt/releases" -Authentication Bearer -Token ($gitToken | ConvertTo-SecureString -AsPlainText)
 
           $targetRelease = $github | Where-Object -Property name -match 'v'| Select -First 1
           $installerUrl = $targetRelease | Select -ExpandProperty assets -First 1 | Where-Object -Property name -match 'igitt-setup-windows-amd64' | Select -ExpandProperty browser_download_url
