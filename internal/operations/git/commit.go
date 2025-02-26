@@ -19,7 +19,7 @@ func CommitChanges(message string) {
 
 	if errOut != nil {
 		logger.ErrorLogger.Println("Error committing changes:", errOut, string(byteOut))
-		utilities.PrintError(string(byteOut))
+		utilities.PrintGitError(string(byteOut))
 		return
 	}
 	logger.InfoLogger.Println("Committing changes:", errOut, string(byteOut))

@@ -20,7 +20,7 @@ func CloneRepository(repoUrl string) {
 
 	if errOut != nil {
 		logger.ErrorLogger.Println("Error cloning:", errOut, string(byteOut))
-		utilities.PrintError(string(byteOut))
+		utilities.PrintGitError(string(byteOut))
 		return
 	}
 

@@ -9,7 +9,9 @@
     "icon_nerdfont": "",
     "icon_ascii": "?",
     "nextStep": "none",
-    "nextStepTitle": "None"
+    "nextStepTitle": "None",
+    "insideRepoOnly": true,
+    "outsideRepoOnly": false
   },
   {
     "id": "op-commit",
@@ -21,7 +23,9 @@
     "icon_nerdfont": "",
     "icon_ascii": "#",
     "nextStep": "ns-enter-commit-message",
-    "nextStepTitle": "Enter commit message"
+    "nextStepTitle": "Enter commit message",
+    "insideRepoOnly": true,
+    "outsideRepoOnly": false
   },
   {
     "id": "op-add",
@@ -33,7 +37,9 @@
     "icon_nerdfont": "",
     "icon_ascii": "+",
     "nextStep": "none",
-    "nextStepTitle": "None"
+    "nextStepTitle": "None",
+    "insideRepoOnly": true,
+    "outsideRepoOnly": false
   },
   {
     "id": "op-pull",
@@ -45,7 +51,9 @@
     "icon_nerdfont": "↓",
     "icon_ascii": "<",
     "nextStep": "none",
-    "nextStepTitle": "None"
+    "nextStepTitle": "None",
+    "insideRepoOnly": true,
+    "outsideRepoOnly": false
   },
   {
     "id": "op-push",
@@ -57,7 +65,9 @@
     "icon_nerdfont": "↑",
     "icon_ascii": ">",
     "nextStep": "none",
-    "nextStepTitle": "None"
+    "nextStepTitle": "None",
+    "insideRepoOnly": true,
+    "outsideRepoOnly": false
   },
   {
     "id": "op-branches",
@@ -69,7 +79,9 @@
     "icon_nerdfont": "",
     "icon_ascii": "B",
     "nextStep": "ns-choose-branch",
-    "nextStepTitle": "Choose a branch"
+    "nextStepTitle": "Choose a branch",
+    "insideRepoOnly": true,
+    "outsideRepoOnly": false
   },
   {
     "id": "op-clone",
@@ -81,7 +93,9 @@
     "icon_nerdfont": "",
     "icon_ascii": "C",
     "nextStep": "ns-enter-repo-url",
-    "nextStepTitle": "Enter remote repository URL"
+    "nextStepTitle": "Enter remote repository URL",
+    "insideRepoOnly": false,
+    "outsideRepoOnly": true
   },
   {
     "id": "op-init",
@@ -93,7 +107,23 @@
     "icon_nerdfont": "",
     "icon_ascii": "*",
     "nextStep": "none",
-    "nextStepTitle": "None"
+    "nextStepTitle": "None",
+    "insideRepoOnly": false,
+    "outsideRepoOnly": true
+  },
+  {
+    "id": "igitt-config",
+    "name": "Configure",
+    "shortcut": "none",
+    "description": "Configure Igitt",
+    "icon": "⚙",
+    "icon_emoji": "⚙️",
+    "icon_nerdfont": "",
+    "icon_ascii": "C",
+    "nextStep": "none",
+    "nextStepTitle": "None",
+    "insideRepoOnly": false,
+    "outsideRepoOnly": false
   },
   {
     "id": "exit",
@@ -105,6 +135,8 @@
     "icon_nerdfont": "×",
     "icon_ascii": "x",
     "nextStep": "none",
-    "nextStepTitle": "None"
+    "nextStepTitle": "None",
+    "insideRepoOnly": false,
+    "outsideRepoOnly": false
   }
 ]

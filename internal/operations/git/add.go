@@ -10,9 +10,11 @@ import (
 	"github.com/nstr-dev/igitt/internal/utilities/logger"
 )
 
-func AddChanges(arguments string) {
-	fmt.Println("Adding changes")
+func AddEverything() {
+	AddChanges(".")
+}
 
+func AddChanges(arguments string) {
 	progressIndicator := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
 	progressIndicator.Start()
 	byteOut, errOut := exec.Command("git", "add", arguments).CombinedOutput()
@@ -20,8 +22,10 @@ func AddChanges(arguments string) {
 
 	if errOut != nil {
 		logger.ErrorLogger.Println("Error adding changes:", errOut, string(byteOut))
-		utilities.PrintError(string(byteOut))
+		utilities.PrintGitError(string(byteOut))
 		return
 	}
 	logger.InfoLogger.Println("Adding changes:", errOut, string(byteOut))
+
+	fmt.Println("Changes added to the staging area.")
 }
