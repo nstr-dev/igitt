@@ -32,5 +32,10 @@ func PrintWelcomeMessage() {
 	heading("Alias")
 	Spacing(2)
 	fmt.Printf("To use the alias %s instead of %s, run following command: %s", command("igt"), command("igitt"), underline(command("igitt igt")))
+	Spacing(2)
+
+	heading("Configuration")
+	Spacing(2)
+	fmt.Printf("To configure Igitt (e.g. to change how icons are displayed and which commands are shown), run %s.", command("igitt config"))
 	Spacing(3)
 }
