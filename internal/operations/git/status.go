@@ -192,7 +192,7 @@ func GetStagedModificationCount() (int, error) {
 
 	stagedCount := 0
 
-	if len(statusLines) == 0 {
+	if len(statusLines) == 0 || (len(statusLines) == 1 && statusLines[0] == "") {
 		return stagedCount, nil
 	}
 
