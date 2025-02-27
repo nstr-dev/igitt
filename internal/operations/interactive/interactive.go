@@ -426,7 +426,10 @@ func runNextStep(formGroups map[string]*huh.Form) error {
 		}
 
 		if modifications == 0 {
-			formGroups["ns-choose-add-files"].Run()
+			err = formGroups["ns-choose-add-files"].Run()
+			if err != nil {
+				logger.ErrorLogger.Fatal(err)
+			}
 			git.AddChanges(commandFlowResult.GitAddArguments)
 			fmt.Println()
 		}
