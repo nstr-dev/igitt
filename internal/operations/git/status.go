@@ -74,7 +74,7 @@ var FileStatuses = []ModifiedStatusInfo{
 }
 
 func Status() {
-	modifications, err := getModifications()
+	modifications, err := GetModifications()
 	if err != nil {
 		logger.ErrorLogger.Println("Failed to get modifications: ", err)
 		return
@@ -115,7 +115,7 @@ func Status() {
 	}
 }
 
-func getModifications() ([]FileStatus, error) {
+func GetModifications() ([]FileStatus, error) {
 	var statuses []FileStatus
 
 	status, err := runGitStatus()

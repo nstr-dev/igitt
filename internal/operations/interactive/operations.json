@@ -36,8 +36,8 @@
     "icon_emoji": "➕",
     "icon_nerdfont": "",
     "icon_ascii": "+",
-    "nextStep": "none",
-    "nextStepTitle": "None",
+    "nextStep": "ns-choose-add-files",
+    "nextStepTitle": "Choose files to stage",
     "insideRepoOnly": true,
     "outsideRepoOnly": false
   },
