@@ -46,12 +46,13 @@ type Command struct {
 type CommandFlowResult struct {
 	SelectedCommand     Command
 	RepoUrlInput        string
-	GitAddArguments     string
+	GitAddArguments     []string
 	CommitMessage       string
 	SelectedBranch      string
 	BranchAction        string
 	NewBranchName       string
 	DeleteBranchConfirm bool
+	SyncWithRemote      bool
 }
 
 const iconWidth = 3
@@ -124,15 +125,32 @@ func getBranchActionOptions() []huh.Option[string] {
 	return branchActionOptions
 }
 
+func getAddFilesOptions() []huh.Option[string] {
+	files, err := git.GetModifications()
+	if err != nil {
+		logger.ErrorLogger.Fatal(err)
+	}
+
+	addFilesOptions := make([]huh.Option[string], len(files))
+
+	for i, f := range files {
+		display := f.StatusLetter + " " + f.FileName
+		addFilesOptions[i] = huh.NewOption(display, f.FileName)
+	}
+
+	return addFilesOptions
+}
+
 var commandFlowResult = CommandFlowResult{
 	SelectedCommand:     Command{Id: "none"},
 	RepoUrlInput:        "",
-	GitAddArguments:     "",
+	GitAddArguments:     []string{},
 	CommitMessage:       "",
 	NewBranchName:       "",
 	SelectedBranch:      "",
 	BranchAction:        "",
 	DeleteBranchConfirm: false,
+	SyncWithRemote:      false,
 }
 
 func StartInteractive() {
@@ -194,6 +212,14 @@ func StartInteractive() {
 	theme.Focused.Base.Border(lipgloss.HiddenBorder())
 	theme.Form.Border(lipgloss.NormalBorder())
 
+	formGroups["ns-ask-sync"] =
+		huh.NewForm(
+			huh.NewGroup(
+				huh.NewConfirm().
+					Title("Sync with remote").
+					Description("\n  Do you want to sync with the remote repository?\n").
+					Value(&commandFlowResult.SyncWithRemote))).WithTheme(theme)
+
 	formGroups["ns-choose-branch"] =
 		huh.NewForm(
 			huh.NewGroup(
@@ -202,6 +228,15 @@ func StartInteractive() {
 					Description("\n  Select a branch\n").
 					OptionsFunc(getBranchOptions, &commandFlowResult.SelectedCommand).
 					Value(&commandFlowResult.SelectedBranch))).WithTheme(theme)
+
+	formGroups["ns-choose-add-files"] =
+		huh.NewForm(
+			huh.NewGroup(
+				huh.NewMultiSelect[string]().
+					OptionsFunc(getAddFilesOptions, &commandFlowResult.SelectedCommand).
+					Title("Stage files").
+					Description("\n  Select files to stage (ctrl + a to select all)\n").
+					Value(&commandFlowResult.GitAddArguments))).WithTheme(theme)
 
 	formGroups["ns-choose-branch-action"] =
 		huh.NewForm(
@@ -285,8 +320,13 @@ func StartInteractive() {
 					Description("\n" +
 						icons.GetCommitIcon(getIconVariantFromConfig()) +
 						"Type a short description to the commit.\n\n" +
-						icons.GetBranchIcon(getIconVariantFromConfig()) + "  " + git.GetBranches().CheckedOutBranch + "\n" +
-						"Files changed: " + git.GetStagedModificationCountAsString() + "\n").
+						icons.GetBranchIcon(getIconVariantFromConfig()) + "  " + git.GetBranches().CheckedOutBranch + "\n" + func() string {
+						count, _ := git.GetStagedModificationCount()
+						if count == 0 {
+							return ""
+						}
+						return "*  Files changed: " + git.GetStagedModificationCountAsString() + "\n"
+					}()).
 					Suggestions([]string{
 						"feat: ",
 						"fix: ",
@@ -379,7 +419,39 @@ func runNextStep(formGroups map[string]*huh.Form) error {
 	}
 
 	if commandFlowResult.SelectedCommand.NextStep == "ns-enter-commit-message" {
-		return formGroups["ns-enter-commit-message"].Run()
+		modifications, err := git.GetStagedModificationCount()
+
+		if err != nil {
+			logger.ErrorLogger.Fatal(err)
+		}
+
+		if modifications == 0 {
+			err = formGroups["ns-choose-add-files"].Run()
+			if err != nil {
+				logger.ErrorLogger.Fatal(err)
+			}
+			git.AddChanges(commandFlowResult.GitAddArguments)
+			fmt.Println()
+		}
+
+		err = formGroups["ns-enter-commit-message"].Run()
+
+		if err != nil {
+			logger.ErrorLogger.Fatal(err)
+		}
+
+		commandFlowResult.SelectedCommand.NextStep = "ns-ask-sync"
+		err = runNextStep(formGroups)
+		return err
+
+	}
+
+	if commandFlowResult.SelectedCommand.NextStep == "ns-choose-add-files" {
+		return formGroups["ns-choose-add-files"].Run()
+	}
+
+	if commandFlowResult.SelectedCommand.NextStep == "ns-ask-sync" {
+		return formGroups["ns-ask-sync"].Run()
 	}
 
 	return nil
@@ -396,6 +468,13 @@ func runResultingCommand() {
 	if commandFlowResult.SelectedCommand.Id == "op-commit" && commandFlowResult.CommitMessage != "" {
 		logger.InfoLogger.Println("commit command selected, sending to operations")
 		git.CommitChanges(commandFlowResult.CommitMessage)
+
+		if commandFlowResult.SyncWithRemote {
+			logger.InfoLogger.Println("sync command selected, sending to operations")
+			git.PullRemote()
+			git.PushRemote()
+		}
+
 		return
 	}
 
@@ -466,14 +545,14 @@ func runResultingCommand() {
 		return
 	}
 
-	if commandFlowResult.SelectedCommand.Id == "op-add" && commandFlowResult.GitAddArguments == "" {
+	if commandFlowResult.SelectedCommand.Id == "op-add" && len(commandFlowResult.GitAddArguments) == 0 {
 		logger.InfoLogger.Println("add command selected with no arguments, sending to operations")
 		git.AddEverything()
 		return
 	}
 
-	if commandFlowResult.SelectedCommand.Id == "op-add" && commandFlowResult.GitAddArguments != "" {
-		logger.InfoLogger.Println("add command selected, sending to operations")
+	if commandFlowResult.SelectedCommand.Id == "op-add" && len(commandFlowResult.GitAddArguments) > 0 {
+		logger.InfoLogger.Println("add command selected, sending to operations with arguments", commandFlowResult.GitAddArguments)
 		git.AddChanges(commandFlowResult.GitAddArguments)
 		return
 	}

@@ -14,7 +14,7 @@ func PushRemote() {
 	fmt.Println("Pushing to remote repository")
 	progressIndicator := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
 	progressIndicator.Start()
-	byteOut, errOut := exec.Command("git", "push").CombinedOutput()
+	byteOut, errOut := exec.Command("git", "-c", "push.autoSetupRemote=true", "push").CombinedOutput()
 	progressIndicator.Stop()
 
 	if errOut != nil {

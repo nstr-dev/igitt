@@ -18,8 +18,8 @@ func CommitChanges(message string) {
 	progressIndicator.Stop()
 
 	if errOut != nil {
-		logger.ErrorLogger.Println("Error committing changes:", errOut, string(byteOut))
 		utilities.PrintGitError(string(byteOut))
+		logger.ErrorLogger.Fatal("Error committing changes:", errOut, string(byteOut))
 		return
 	}
 	logger.InfoLogger.Println("Committing changes:", errOut, string(byteOut))

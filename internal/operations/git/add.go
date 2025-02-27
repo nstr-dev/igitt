@@ -11,13 +11,13 @@ import (
 )
 
 func AddEverything() {
-	AddChanges(".")
+	AddChanges([]string{"."})
 }
 
-func AddChanges(arguments string) {
+func AddChanges(arguments []string) {
 	progressIndicator := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
 	progressIndicator.Start()
-	byteOut, errOut := exec.Command("git", "add", arguments).CombinedOutput()
+	byteOut, errOut := exec.Command("git", append([]string{"add"}, arguments...)...).CombinedOutput()
 	progressIndicator.Stop()
 
 	if errOut != nil {
@@ -28,4 +28,6 @@ func AddChanges(arguments string) {
 	logger.InfoLogger.Println("Adding changes:", errOut, string(byteOut))
 
 	fmt.Println("Changes added to the staging area.")
+
+	Status()
 }

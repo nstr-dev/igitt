@@ -83,7 +83,7 @@ func InitializeIgitt(version string, commit string, buildDate string) {
 		Aliases: []string{"a", "+"},
 		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			git.AddChanges(strings.Join(args, " "))
+			git.AddChanges(args)
 		},
 	}
 
