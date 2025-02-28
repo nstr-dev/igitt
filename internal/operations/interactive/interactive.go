@@ -96,6 +96,10 @@ func getTitle(command Command) string {
 }
 
 func getBranchOptions() []huh.Option[string] {
+	if !utilities.CheckIsRepo() {
+		return []huh.Option[string]{}
+	}
+
 	branchResult := git.GetBranches()
 	branches := branchResult.Branches
 
@@ -126,6 +130,10 @@ func getBranchActionOptions() []huh.Option[string] {
 }
 
 func getAddFilesOptions() []huh.Option[string] {
+	if !utilities.CheckIsRepo() {
+		return []huh.Option[string]{}
+	}
+
 	files, err := git.GetModifications()
 	if err != nil {
 		logger.ErrorLogger.Fatal(err)
@@ -320,7 +328,15 @@ func StartInteractive() {
 					Description("\n" +
 						icons.GetCommitIcon(getIconVariantFromConfig()) +
 						"Type a short description to the commit.\n\n" +
-						icons.GetBranchIcon(getIconVariantFromConfig()) + "  " + git.GetBranches().CheckedOutBranch + "\n" + func() string {
+						icons.GetBranchIcon(getIconVariantFromConfig()) + "  " + func() string {
+						if !utilities.CheckIsRepo() {
+							return ""
+						}
+						return git.GetBranches().CheckedOutBranch
+					}() + "\n" + func() string {
+						if !utilities.CheckIsRepo() {
+							return ""
+						}
 						count, _ := git.GetStagedModificationCount()
 						if count == 0 {
 							return ""
