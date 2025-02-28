@@ -57,9 +57,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 Source: "{#MyAppExeName}"; DestDir: "{app}";
-Source: ".innosetup\igitt.exe.log"; DestDir: "{app}";
-Source: ".innosetup\igt.cmd"; DestDir: "{app}";
-Source: ".innosetup\igittconfig.yaml"; DestDir: "{app}";
+Source: ".innosetup\igitt.exe.log"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs onlyifdoesntexist;
+Source: ".innosetup\igt.cmd"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs onlyifdoesntexist;
+Source: ".innosetup\igittconfig.yaml"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs onlyifdoesntexist;
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
